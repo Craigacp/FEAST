@@ -115,6 +115,11 @@ void ICAP(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, doubl
 void CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures);
 
 /*******************************************************************************
+** MIM() implements the MIM criterion using a greedy forward search
+*******************************************************************************/
+void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures);
+
+/*******************************************************************************
 ** betaGamma() implements the Beta-Gamma space from Brown (2009).
 ** This incoporates MIFS, CIFE, and CondRed.
 **

@@ -16,3 +16,10 @@
 *.exe
 *.out
 *.app
+
+# Matlab/Octave executables
+*.mex*
+*.oct*
+
+# Editor backups
+*~
