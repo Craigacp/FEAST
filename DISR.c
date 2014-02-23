@@ -8,6 +8,7 @@
 ** Initial Version - 13/06/2008
 ** Updated - 23/06/2011
 ** Updated - 22/02/2014 - Moved feature index increment to mex code.
+** Updated - 22/02/2014 - Patched calloc.
 **
 ** Author - Adam Pocock
 ** 
@@ -58,23 +59,23 @@
 void DISR(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
   /*holds the class MI values*/
-  double *classMI = (double *)CALLOC_FUNC(noOfFeatures,sizeof(double));
+  double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
   
-  char *selectedFeatures = (char *)CALLOC_FUNC(noOfFeatures,sizeof(char));
+  char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
   
   /*holds the intra feature MI values*/
   int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *)CALLOC_FUNC(sizeOfMatrix,sizeof(double));
+  double *featureMIMatrix = (double *)checkedCalloc(sizeOfMatrix,sizeof(double));
   
   double maxMI = 0.0;
   int maxMICounter = -1;
   
-  double **feature2D = (double**) CALLOC_FUNC(noOfFeatures,sizeof(double*));
+  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
   
   double score, currentScore, totalFeatureMI;
   int currentHighestFeature;
   
-  double *mergedVector = (double *) CALLOC_FUNC(noOfSamples,sizeof(double));
+  double *mergedVector = (double *) checkedCalloc(noOfSamples,sizeof(double));
   
   int arrayPosition;
   double mi, tripEntropy;

@@ -39,12 +39,12 @@
 PREFIX = /usr/local
 CXXFLAGS = -O3 -fPIC
 COMPILER = gcc
-LINKER = ld
+LINKER = gcc
 MITOOLBOXPATH = ../MIToolbox/
 objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o
 
 libFSToolbox.so : $(objects)
-	$(LINKER) -lMIToolbox -lm -shared -o libFSToolbox.so $(objects)
+	$(LINKER) -lMIToolbox -lm -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects)
 
 mRMR_D.o: mRMR_D.c  
 	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c mRMR_D.c -I$(MITOOLBOXPATH)

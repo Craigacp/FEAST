@@ -9,6 +9,7 @@
 ** Initial Version - 13/06/2008
 ** Updated - 23/06/2011 - Patched first feature selection error.
 ** Updated - 22/02/2014 - Moved feature index increment to mex code.
+** Updated - 22/02/2014 - Patched calloc.
 **
 ** Author - Adam Pocock
 ** 
@@ -52,6 +53,7 @@
 #include "FSToolbox.h"
 
 /* MIToolbox includes */
+#include "ArrayOperations.h"
 #include "MutualInformation.h"
   
 void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
@@ -59,9 +61,9 @@ void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, doubl
   /*holds the class MI values
   **the class MI doubles as the partial score from the CMIM paper
   */
-  double *classMI = (double *)CALLOC_FUNC(noOfFeatures,sizeof(double));
+  double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
   /*in the CMIM paper, m = lastUsedFeature*/
-  int *lastUsedFeature = (int *)CALLOC_FUNC(noOfFeatures,sizeof(int));
+  int *lastUsedFeature = (int *)checkedCalloc(noOfFeatures,sizeof(int));
   
   double score, conditionalInfo;
   int iMinus, currentFeature;
@@ -71,7 +73,7 @@ void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, doubl
   
   int j,i;
 
-  double **feature2D = (double**) CALLOC_FUNC(noOfFeatures,sizeof(double*));
+  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
 
   for(j = 0; j < noOfFeatures; j++)
   {

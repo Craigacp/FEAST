@@ -3,6 +3,7 @@
 ** features with the largest univariate mutual informations.
 **
 ** Initial Version - 22/02/2014
+** Updated - 22/02/2014 - Patched calloc.
 **
 ** Author - Adam Pocock
 ** 
@@ -46,31 +47,21 @@
 #include "FSToolbox.h"
 
 /* MIToolbox includes */
+#include "ArrayOperations.h"
 #include "MutualInformation.h"
 
 void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
-    double **feature2D = (double **) CALLOC_FUNC(noOfFeatures,sizeof(double *));
+    double **feature2D = (double **) checkedCalloc(noOfFeatures,sizeof(double *));
     
     /*holds the class MI values*/
-    double *classMI = (double *)CALLOC_FUNC(noOfFeatures,sizeof(double));
-    char *selectedFeatures = (char *)CALLOC_FUNC(noOfFeatures,sizeof(char));
+    double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
+    char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
     double maxMI = 0.0;
     int maxMICounter = -1;
     int i,j;
 
-    /***********************************************************
-    ** because the array is passed as
-    **  s a m p l e s
-    ** f
-    ** e
-    ** a
-    ** t
-    ** u
-    ** r
-    ** e
-    ** s
-    ** 
+    /**********************************************************
     ** this pulls out a pointer to the first sample of
     ** each feature and stores it as a multidimensional array
     ** so it can be indexed nicely
@@ -80,11 +71,6 @@ void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double
         feature2D[j] = featureMatrix + (int)j*noOfSamples;
     }
 
-    for (i = 0; i < sizeOfMatrix; i++)
-    {
-        featureMIMatrix[i] = -1;
-    }/*for featureMIMatrix - blank to -1*/
-    
     /***********************************************************
     ** SETUP COMPLETE
     ** Algorithm starts here
