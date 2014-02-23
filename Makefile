@@ -36,19 +36,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+PREFIX = /usr/local
 CXXFLAGS = -O3 -fPIC
 COMPILER = gcc
+LINKER = ld
 MITOOLBOXPATH = ../MIToolbox/
 objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o
 
 libFSToolbox.so : $(objects)
-	$(COMPILER) $(CXXFLAGS) -lMIToolbox -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects)
+	$(LINKER) -lMIToolbox -lm -shared -o libFSToolbox.so $(objects)
 
 mRMR_D.o: mRMR_D.c  
 	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c mRMR_D.c -I$(MITOOLBOXPATH)
 
 CMIM.o: CMIM.c 
 	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c CMIM.c -I$(MITOOLBOXPATH)
+
+MIM.o: MIM.c 
+	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c MIM.c -I$(MITOOLBOXPATH)
 
 JMI.o: JMI.c 
 	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c JMI.c -I$(MITOOLBOXPATH)
@@ -79,18 +84,23 @@ x64:
 	
 .PHONY : matlab
 matlab:
-	mex -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
+	mex -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c MIM.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
   
 .PHONY : matlab-debug
 matlab-debug:
-	mex -g -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
+	mex -g -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c MIM.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
 
 .PHONY : intel
 intel:
-	$(MAKE) libFSToolbox.so "COMPILER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
+	$(MAKE) libFSToolbox.so "COMPILER = icc" "LINKER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
 
 .PHONY : clean
 clean:
 	rm *.o 
 	rm libFSToolbox.so
 
+.PHONY : install
+install:
+	$(MAKE)
+	@echo "Installing FEAST's libFSToolbox.so to $(PREFIX)/lib"
+	cp -v libFSToolbox.so $(PREFIX)/lib
