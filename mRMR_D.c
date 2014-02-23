@@ -55,7 +55,7 @@
 #include "ArrayOperations.h"
 #include "MutualInformation.h"
 
-void mRMR_D(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+double* mRMR_D(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
   double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
   /*holds the class MI values*/
@@ -163,5 +163,6 @@ void mRMR_D(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   featureMIMatrix = NULL;
   selectedFeatures = NULL;
   
+  return outputFeatures;
 }/*mRMR(int,int,int,double[][],double[],double[])*/
 

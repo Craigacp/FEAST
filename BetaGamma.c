@@ -60,7 +60,7 @@
 #include "ArrayOperations.h"
 #include "MutualInformation.h"
 
-void BetaGamma(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double betaParam, double gammaParam)
+double* BetaGamma(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double betaParam, double gammaParam)
 {
     double **feature2D = (double **) checkedCalloc(noOfFeatures,sizeof(double *));
     
@@ -191,5 +191,6 @@ void BetaGamma(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   featureMIMatrix = NULL;
   selectedFeatures = NULL;
   
+  return outputFeatures;
 }/*BetaGamma(int,int,int,double[][],double[],double[],double,double)*/
 

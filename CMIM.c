@@ -56,7 +56,7 @@
 #include "ArrayOperations.h"
 #include "MutualInformation.h"
   
-void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+double* CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
   /*holds the class MI values
   **the class MI doubles as the partial score from the CMIM paper
@@ -134,5 +134,6 @@ void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, doubl
   lastUsedFeature = NULL;
   feature2D = NULL;
 
+  return outputFeatures;
 }/*CMIM(int,int,int,double[][],double[],double[])*/
 

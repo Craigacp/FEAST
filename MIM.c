@@ -50,7 +50,7 @@
 #include "ArrayOperations.h"
 #include "MutualInformation.h"
 
-void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+double* MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
     double **feature2D = (double **) checkedCalloc(noOfFeatures,sizeof(double *));
     
@@ -122,5 +122,6 @@ void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double
   feature2D = NULL;
   selectedFeatures = NULL;
   
+  return outputFeatures;
 }/*MIM(int,int,int,double[][],double[],double[])*/
 
