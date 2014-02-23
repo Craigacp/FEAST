@@ -7,7 +7,8 @@
 ** F. Fleuret, JMLR (2004)
 **
 ** Initial Version - 13/06/2008
-** Updated - 23/06/2011
+** Updated - 23/06/2011 - Patched first feature selection error.
+** Updated - 22/02/2014 - Moved feature index increment to mex code.
 **
 ** Author - Adam Pocock
 ** 
@@ -19,7 +20,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2013, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -122,12 +123,6 @@ void CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, doubl
       }/*if partial score still greater than score*/
 	}/*for number of features*/
   }/*for the number of features to select*/
-  
-  
-  for (i = 0; i < k; i++)
-  {
-    outputFeatures[i] += 1; /*C indexes from 0 not 1*/
-  }/*for number of selected features*/
   
   FREE_FUNC(classMI);
   FREE_FUNC(lastUsedFeature);

@@ -128,10 +128,13 @@ void MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double
         outputFeatures[i] = maxMICounter;
     }/*for the number of features to select*/
     
-    for (i = 0; i < k; i++)
-    {
-        outputFeatures[i] += 1; /*C++ indexes from 0 not 1*/
-    }/*for number of selected features*/
-    
+  FREE_FUNC(classMI);
+  FREE_FUNC(feature2D);
+  FREE_FUNC(selectedFeatures);
+  
+  classMI = NULL;
+  feature2D = NULL;
+  selectedFeatures = NULL;
+  
 }/*MIM(int,int,int,double[][],double[],double[])*/
 

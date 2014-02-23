@@ -3,6 +3,7 @@
 ** It provides a MATLAB interface to the various selection algorithms.
 **
 ** Initial Version - 27/06/2011
+** Updated         - 22/02/2014 - Moved increment of feature numbers to this file.
 **
 ** Author - Adam Pocock
 ** 
@@ -14,7 +15,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2013, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -45,6 +46,14 @@
 #include "FSToolbox.h"
 #include "FSAlgorithms.h"
 #include "Entropy.h"
+
+void incrementFeatureIndices(double* featureIdxs, int vectorLength) {
+    int i = 0;
+    for (i = 0; i < vectorLength; i++)
+    {
+        featureIdxs[i]++; /*C indexes from 0 not 1*/
+    }/*for number of selected features*/
+}/* incrementFeatureIndices(double*,int) */
 
 /******************************************************************************
 ** entry point for the mex call
@@ -166,6 +175,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
                 /*void BetaGamma(int k, long noOfSamples, long noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma)*/
                 BetaGamma(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output,optionalParam1,optionalParam2);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 2: /* mRMR */
@@ -175,6 +186,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 
                 /*void mRMR_D(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
                 mRMR_D(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 3: /* CMIM */
@@ -184,6 +197,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 
                 /*void CMIM(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
                 CMIM(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 4: /* JMI */
@@ -193,6 +208,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                
                 /*void JMI(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
                 JMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 5: /* DISR */
@@ -202,6 +219,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 
                 /*void DISR(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
                 DISR(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 6: /* CIFE */
@@ -215,6 +234,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
                 /*void BetaGamma(int k, long noOfSamples, long noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma)*/
                 BetaGamma(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output,optionalParam1,optionalParam2);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 7: /* ICAP */
@@ -224,6 +245,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 
                 /*void ICAP(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);*/
                 ICAP(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 8: /* CondRed */
@@ -237,6 +260,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
                 /*void BetaGamma(int k, long noOfSamples, long noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma)*/
                 BetaGamma(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output,optionalParam1,optionalParam2);
+
+                incrementFeatureIdxs(output,k);
                 break;
             }
             case 9: /* BetaGamma */
@@ -254,6 +279,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 
                     /*void BetaGamma(int k, long noOfSamples, long noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma)*/
                     BetaGamma(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output,optionalParam1,optionalParam2);
+                    
+                    incrementFeatureIdxs(output,k);
                 }
                 break;
             }
