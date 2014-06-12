@@ -1,7 +1,7 @@
 FEAST
 =====
 
-A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v1.1.
+A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v1.1.1.
 
 FEAST provides implementations of common mutual information based filter
 feature selection algorithms, and an implementation of RELIEF. All
@@ -75,6 +75,7 @@ Compilation instructions:
  - Linux C shared library - use the included makefile
 
 Update History
+ - 11/06/2014 - v1.1.1 - Fixed an issue where MIM wasn't compiled into libFSToolbox.
  - 22/02/2014 - v1.1 - Bug fixes in memory allocation, added a C implementation of MIM, moved the selected feature increment into the mex code.
  - 12/02/2013 - v1.0.1 - Bug fix for 32-bit Windows MATLAB's lcc.
  - 08/11/2011 - v1.0 - Public Release to complement the JMLR publication.

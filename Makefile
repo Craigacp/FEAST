@@ -41,7 +41,7 @@ CXXFLAGS = -O3 -fPIC
 COMPILER = gcc
 LINKER = gcc
 MITOOLBOXPATH = ../MIToolbox/
-objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o
+objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o MIM.o
 
 libFSToolbox.so : $(objects)
 	$(LINKER) -lMIToolbox -lm -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects)
