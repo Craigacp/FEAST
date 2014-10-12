@@ -1,11 +1,12 @@
 /*******************************************************************************
 **  FSAlgorithms.h
 **  Provides the function definitions for the list of algorithms implemented
-**  in the FSToolbox.
+**  in the FEAST.
 **
 **  Author: Adam Pocock
 **  Created - 27/06/2011
 **  Updated - 22/02/2014 - Changed function definitions to improve compatibility with PyFeast.
+**            12/10/2014 - Added a note saying FEAST expects column-major matrices.
 **
 ** Part of the FEAture Selection Toolbox (FEAST), please reference
 ** "Conditional Likelihood Maximisation: A Unifying Framework for Information
@@ -16,7 +17,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2013, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -50,6 +51,8 @@
  * algorithm takes pointers to the data matrix, and the label vector, and 
  * a pointer to the output vector. The output vector should be pre-allocated
  * with sizeof(double)*k bytes.
+ *
+ * FSToolbox expects all matrices to be in column-major (Fortan style) format.
  *
  * Some algorithms take additional parameters, which given at the end of the 
  * standard parameter list.
