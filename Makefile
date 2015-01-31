@@ -44,7 +44,7 @@ MITOOLBOXPATH = ../MIToolbox/
 objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o MIM.o
 
 libFSToolbox.so : $(objects)
-	$(LINKER) -lMIToolbox -lm -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects)
+	$(LINKER) -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects) -lMIToolbox -lm
 
 mRMR_D.o: mRMR_D.c  
 	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c mRMR_D.c -I$(MITOOLBOXPATH)
