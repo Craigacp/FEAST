@@ -103,4 +103,7 @@ clean:
 install:
 	$(MAKE)
 	@echo "Installing FEAST's libFSToolbox.so to $(PREFIX)/lib"
-	cp -v libFSToolbox.so $(PREFIX)/lib
+	@cp -v libFSToolbox.so $(PREFIX)/lib
+	@echo "Installing FEAST's header files to $(PREFIX)/include/FEAST"
+	@mkdir -p $(PREFIX)/include/FEAST
+	@cp -v FSToolbox.h FSAlgorithms.h $(PREFIX)/include/FEAST/
