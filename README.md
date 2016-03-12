@@ -87,7 +87,7 @@ Compilation instructions:
  - Linux C shared library - use the included makefile
 
 Update History
- - 12/03/2016 - v1.1.3 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
+ - 12/03/2016 - v1.1.4 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
  - 12/10/2014 - v1.1.2 - Updated documentation to note that FEAST expects column-major matrices.
  - 11/06/2014 - v1.1.1 - Fixed an issue where MIM wasn't compiled into libFSToolbox.
  - 22/02/2014 - v1.1.0 - Bug fixes in memory allocation, added a C implementation of MIM, moved the selected feature increment into the mex code.
