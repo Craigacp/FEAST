@@ -10,6 +10,7 @@
 ** Updated - 23/06/2011 - Patched first feature selection error.
 ** Updated - 22/02/2014 - Moved feature index increment to mex code.
 ** Updated - 22/02/2014 - Patched calloc.
+** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
 **
 ** Author - Adam Pocock
 ** 
@@ -68,7 +69,8 @@ double* CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, do
   double score, conditionalInfo;
   int iMinus, currentFeature;
   
-  double maxMI = 0.0;
+  /*Changed to ensure it always picks a feature*/
+  double maxMI = -1.0;
   int maxMICounter = -1;
   
   int j,i;

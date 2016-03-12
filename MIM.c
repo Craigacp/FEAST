@@ -4,6 +4,7 @@
 **
 ** Initial Version - 22/02/2014
 ** Updated - 22/02/2014 - Patched calloc.
+** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
 **
 ** Author - Adam Pocock
 ** 
@@ -57,7 +58,8 @@ double* MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
     /*holds the class MI values*/
     double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
     char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
-    double maxMI = 0.0;
+    /*Changed to ensure it always picks a feature*/
+    double maxMI = -1.0;
     int maxMICounter = -1;
     int i,j;
 

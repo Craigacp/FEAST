@@ -8,6 +8,7 @@
 ** Updated - 23/06/2011
 ** Updated - 22/02/2014 - Moved feature index increment to mex code.
 ** Updated - 22/02/2014 - Patched calloc.
+** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
 **
 ** Author - Adam Pocock
 ** 
@@ -65,7 +66,8 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   int sizeOfMatrix = k*noOfFeatures;
   double *featureMIMatrix = (double *)checkedCalloc(sizeOfMatrix,sizeof(double));
   
-  double maxMI = 0.0;
+  /*Changed to ensure it always picks a feature*/
+  double maxMI = -1.0;
   int maxMICounter = -1;
   
   double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));

@@ -25,10 +25,12 @@ References for these algorithms are provided in the accompanying feast.bib file
 
 MATLAB Example (using "data" as our feature matrix, and "labels" as the class label vector):
 
+```
 >> size(data)
 ans = 
      (569,30)                                     %% denoting 569 examples, and 30 features
-
+```
+```
 >> selectedIndices = feast('jmi',5,data,labels) %% selecting the top 5 features using the jmi algorithm
 selectedIndices =
 
@@ -37,7 +39,8 @@ selectedIndices =
      8
     27
     23
-
+```
+```
 >> selectedIndices = feast('mrmr',10,data,labels) %% selecting the top 10 features using the mrmr algorithm
 selectedIndices =
 
@@ -51,7 +54,8 @@ selectedIndices =
      4
      7
     25
-
+```
+```
 >> selectedIndices = feast('mifs',5,data,labels,0.7) %% selecting the top 5 features using the mifs algorithm with beta = 0.7
 selectedIndices =
 
@@ -60,6 +64,7 @@ selectedIndices =
     22
     20
     29
+```
 
 The library is written in ANSI C for compatibility with the MATLAB mex
 compiler, except for MIM, FCBF and RELIEF, which are written in MATLAB/OCTAVE
@@ -82,6 +87,7 @@ Compilation instructions:
  - Linux C shared library - use the included makefile
 
 Update History
+ - 12/03/2016 - v1.1.3 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
  - 12/10/2014 - v1.1.2 - Updated documentation to note that FEAST expects column-major matrices.
  - 11/06/2014 - v1.1.1 - Fixed an issue where MIM wasn't compiled into libFSToolbox.
  - 22/02/2014 - v1.1.0 - Bug fixes in memory allocation, added a C implementation of MIM, moved the selected feature increment into the mex code.
