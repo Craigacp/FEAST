@@ -1,7 +1,7 @@
 FEAST
 =====
 
-A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v1.1.2.
+A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v1.1.4.
 
 FEAST provides implementations of common mutual information based filter
 feature selection algorithms, and an implementation of RELIEF. All functions

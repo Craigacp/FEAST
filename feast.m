@@ -43,6 +43,10 @@ if ((numToSelect < 1) || (numToSelect > size(data,2)))
     error(['You have requested ' num2str(numToSelect) ' features, which is not possible']);
 end
 
+if (~isa(data,'double') || ~isa(labels,'double'))
+  error('Error, inputs must be double vectors or matrices')
+end
+
 finiteDataCount = sum(sum(isfinite(data)));
 finiteLabelsCount = sum(sum(isfinite(labels)));
 
