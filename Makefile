@@ -37,73 +37,41 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 PREFIX = /usr/local
-CXXFLAGS = -O3 -fPIC
-COMPILER = gcc
+CFLAGS = -O3 -fPIC -std=c89 -Wall #-Werror
+CC = gcc
 LINKER = gcc
-MITOOLBOXPATH = ../MIToolbox/
-objects = mRMR_D.o CMIM.o JMI.o DISR.o CondMI.o ICAP.o BetaGamma.o MIM.o
+INCLUDES = -I../MIToolbox/include -Iinclude
+objects = build/mRMR_D.o build/CMIM.o build/JMI.o build/DISR.o build/CondMI.o build/ICAP.o build/BetaGamma.o build/MIM.o
 
 libFSToolbox.so : $(objects)
-	$(LINKER) -L$(MITOOLBOXPATH) -shared -o libFSToolbox.so $(objects) -lMIToolbox -lm
+	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
 
-mRMR_D.o: mRMR_D.c  
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c mRMR_D.c -I$(MITOOLBOXPATH)
-
-CMIM.o: CMIM.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c CMIM.c -I$(MITOOLBOXPATH)
-
-MIM.o: MIM.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c MIM.c -I$(MITOOLBOXPATH)
-
-JMI.o: JMI.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c JMI.c -I$(MITOOLBOXPATH)
-
-DISR.o: DISR.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c DISR.c -I$(MITOOLBOXPATH)
-
-CondMI.o: CondMI.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c CondMI.c -I$(MITOOLBOXPATH)
-
-ICAP.o: ICAP.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c ICAP.c -I$(MITOOLBOXPATH)
-
-BetaGamma.o: BetaGamma.c 
-	$(COMPILER) $(CXXFLAGS) -DCOMPILE_C -c BetaGamma.c -I$(MITOOLBOXPATH)
+build/%.o: src/%.c 
+	@mkdir -p build
+	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $<
 	
-.PHONY : debug
+.PHONY : debug x86 x64 intel clean install
 debug:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -g -DDEBUG -fPIC"
 	
-.PHONY : x86
 x86:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -O3 -fPIC -m32"
 	
-.PHONY : x64
 x64:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -O3 -fPIC -m64"
-	
-.PHONY : matlab
-matlab:
-	mex -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c MIM.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
-  
-.PHONY : matlab-debug
-matlab-debug:
-	mex -g -I$(MITOOLBOXPATH) FSToolboxMex.c BetaGamma.c CMIM.c CondMI.c DISR.c ICAP.c JMI.c MIM.c mRMR_D.c $(MITOOLBOXPATH)MutualInformation.c $(MITOOLBOXPATH)Entropy.c $(MITOOLBOXPATH)CalculateProbability.c $(MITOOLBOXPATH)ArrayOperations.c
 
-.PHONY : intel
 intel:
 	$(MAKE) libFSToolbox.so "COMPILER = icc" "LINKER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
 
-.PHONY : clean
 clean:
-	rm *.o 
-	rm libFSToolbox.so
+	-rm -fr build
+	-rm -f matlab/*.o matlab/*.mex*
+	-rm -f libFSToolbox.so
 
-.PHONY : install
 install:
 	$(MAKE)
 	@echo "Installing FEAST's libFSToolbox.so to $(PREFIX)/lib"
 	@cp -v libFSToolbox.so $(PREFIX)/lib
 	@echo "Installing FEAST's header files to $(PREFIX)/include/FEAST"
-	@mkdir -p $(PREFIX)/include/FEAST
-	@cp -v FSToolbox.h FSAlgorithms.h $(PREFIX)/include/FEAST/
+	@mkdir -p $(PREFIX)/include
+	@cp -vr include/FEAST $(PREFIX)/include/

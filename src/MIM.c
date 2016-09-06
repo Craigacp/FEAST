@@ -44,20 +44,20 @@
 **
 *******************************************************************************/
 
-#include "FSAlgorithms.h"
-#include "FSToolbox.h"
+#include "FEAST/FSAlgorithms.h"
+#include "FEAST/FSToolbox.h"
 
 /* MIToolbox includes */
-#include "ArrayOperations.h"
-#include "MutualInformation.h"
+#include "MIToolbox/ArrayOperations.h"
+#include "MIToolbox/MutualInformation.h"
 
 double* MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
     double **feature2D = (double **) checkedCalloc(noOfFeatures,sizeof(double *));
     
     /*holds the class MI values*/
-    double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
-    char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
+    double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
+    char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
     /*Changed to ensure it always picks a feature*/
     double maxMI = -1.0;
     int maxMICounter = -1;
@@ -80,7 +80,7 @@ double* MIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
     
     for (i = 0; i < noOfFeatures; i++)
     {
-        classMI[i] = calculateMutualInformation(feature2D[i], classColumn, noOfSamples);
+        classMI[i] = discAndCalcMutualInformation(feature2D[i], classColumn, noOfSamples);
         
         if (classMI[i] > maxMI)
         {

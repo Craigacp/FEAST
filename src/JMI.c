@@ -48,23 +48,23 @@
 **
 *******************************************************************************/
 
-#include "FSAlgorithms.h"
-#include "FSToolbox.h"
+#include "FEAST/FSAlgorithms.h"
+#include "FEAST/FSToolbox.h"
 
 /* MIToolbox includes */
-#include "MutualInformation.h"
-#include "ArrayOperations.h"
+#include "MIToolbox/MutualInformation.h"
+#include "MIToolbox/ArrayOperations.h"
 
 double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
   /*holds the class MI values*/
-  double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
+  double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
   
-  char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
+  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
   
   /*holds the intra feature MI values*/
   int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *)checkedCalloc(sizeOfMatrix,sizeof(double));
+  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
   
   /*Changed to ensure it always picks a feature*/
   double maxMI = -1.0;
@@ -72,16 +72,19 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   
   double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
   
-  double score, currentScore, totalFeatureMI;
+  double score, currentScore;
   int currentHighestFeature;
   
-  double *mergedVector = (double *) checkedCalloc(noOfSamples,sizeof(double));
+  int *mergedVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  int *labelColumn = (int *) checkedCalloc(noOfSamples,sizeof(int));
   
   int arrayPosition;
-  double mi, tripEntropy;
+  double mi;
   
   int i,j,x;
   
+  normaliseArray(classColumn,labelColumn,noOfSamples);
+
   for(j = 0; j < noOfFeatures; j++)
   {
     feature2D[j] = featureMatrix + (int)j*noOfSamples;
@@ -96,9 +99,9 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   for (i = 0; i < noOfFeatures;i++)
   {    
     /*calculate mutual info
-    **double calculateMutualInformation(double *firstVector, double *secondVector, int vectorLength);
+    **double discAndCalcMutualInformation(double *firstVector, double *secondVector, int vectorLength);
     */
-    classMI[i] = calculateMutualInformation(feature2D[i], classColumn, noOfSamples);
+    classMI[i] = discAndCalcMutualInformation(feature2D[i], classColumn, noOfSamples);
     
     if (classMI[i] > maxMI)
     {
@@ -121,7 +124,6 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
     score = 0.0;
     currentHighestFeature = 0;
     currentScore = 0.0;
-    totalFeatureMI = 0.0;
     
     for (j = 0; j < noOfFeatures; j++)
     {
@@ -129,16 +131,15 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
       if (selectedFeatures[j] == 0)
       {
         currentScore = 0.0;
-        totalFeatureMI = 0.0;
         
         for (x = 0; x < i; x++)
         {
           arrayPosition = x*noOfFeatures + j;
           if (featureMIMatrix[arrayPosition] == -1)
           {
-            mergeArrays(feature2D[(int) outputFeatures[x]], feature2D[j],mergedVector,noOfSamples);
-            /*double calculateMutualInformation(double *firstVector, double *secondVector, int vectorLength);*/
-            mi = calculateMutualInformation(mergedVector, classColumn, noOfSamples);
+            discAndMergeArrays(feature2D[(int) outputFeatures[x]], feature2D[j],mergedVector,noOfSamples);
+            /*double calcMutualInformation(int *firstVector, int *secondVector, int vectorLength);*/
+            mi = calcMutualInformation(mergedVector, labelColumn, noOfSamples);
             
             featureMIMatrix[arrayPosition] = mi;
           }/*if not already known*/
@@ -162,12 +163,14 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   FREE_FUNC(feature2D);
   FREE_FUNC(featureMIMatrix);
   FREE_FUNC(mergedVector);
+  FREE_FUNC(labelColumn);
   FREE_FUNC(selectedFeatures);
   
   classMI = NULL;
   feature2D = NULL;
   featureMIMatrix = NULL;
   mergedVector = NULL;
+  labelColumn = NULL;
   selectedFeatures = NULL;
   
   return outputFeatures;

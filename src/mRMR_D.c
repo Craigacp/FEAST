@@ -1,8 +1,13 @@
 /*******************************************************************************
-** CondMI.c, implements the CMI criterion using a greedy forward search
+** mRMR_D.c implements the minimum Relevance Maximum Redundancy criterion
+** using the difference variant, from
 **
-** Initial Version - 19/08/2010
-** Updated - 23/06/2011
+** "Feature Selection Based on Mutual Information: Criteria of Max-Dependency, Max-Relevance, and Min-Redundancy"
+** H. Peng et al. IEEE PAMI (2005)
+**
+** Initial Version - 13/06/2008
+** Updated - 12/02/2013 - patched the use of DBL_MAX
+** Updated - 22/02/2014 - Moved feature index increment to mex code.
 ** Updated - 22/02/2014 - Patched calloc.
 ** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
 **
@@ -16,7 +21,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2013, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -44,42 +49,33 @@
 **
 *******************************************************************************/
 
-#include "FSAlgorithms.h"
-#include "FSToolbox.h"
-
-/* for memcpy */
-#include <string.h>
+#include "FEAST/FSAlgorithms.h"
+#include "FEAST/FSToolbox.h"
 
 /* MIToolbox includes */
-#include "MutualInformation.h"
-#include "ArrayOperations.h"
+#include "MIToolbox/ArrayOperations.h"
+#include "MIToolbox/MutualInformation.h"
 
-double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+double* mRMR_D(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
+  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
   /*holds the class MI values*/
-  double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
-  
-  char *selectedFeatures = (char *)checkedCalloc(noOfFeatures,sizeof(char));
-  
+  double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
+  int *selectedFeatures = (int *) checkedCalloc(noOfFeatures,sizeof(int));
   /*holds the intra feature MI values*/
   int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *)checkedCalloc(sizeOfMatrix,sizeof(double));
+  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
   
   /*Changed to ensure it always picks a feature*/
   double maxMI = -1.0;
   int maxMICounter = -1;
   
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+  /*init variables*/
   
   double score, currentScore, totalFeatureMI;
   int currentHighestFeature;
   
-  double *conditionVector = (double *) checkedCalloc(noOfSamples,sizeof(double));
-  
-  int arrayPosition;
-  double mi, tripEntropy;
-  
-  int i,j,x;
+  int arrayPosition, i, j, x;
   
   for(j = 0; j < noOfFeatures; j++)
   {
@@ -90,14 +86,11 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   {
     featureMIMatrix[i] = -1;
   }/*for featureMIMatrix - blank to -1*/
+  
 
   for (i = 0; i < noOfFeatures;i++)
-  {    
-    /*calculate mutual info
-    **double calculateMutualInformation(double *firstVector, double *secondVector, int vectorLength);
-    */
-    classMI[i] = calculateMutualInformation(feature2D[i], classColumn, noOfSamples);
-    
+  {
+    classMI[i] = discAndCalcMutualInformation(feature2D[i], classColumn, noOfSamples);
     if (classMI[i] > maxMI)
     {
       maxMI = classMI[i];
@@ -108,18 +101,21 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   selectedFeatures[maxMICounter] = 1;
   outputFeatures[0] = maxMICounter;
   
-  memcpy(conditionVector,feature2D[maxMICounter],sizeof(double)*noOfSamples);
-      
-  /*****************************************************************************
-  ** We have populated the classMI array, and selected the highest
+  /*************
+  ** Now we have populated the classMI array, and selected the highest
   ** MI feature as the first output feature
-  ** Now we move into the CondMI algorithm
-  *****************************************************************************/
+  ** Now we move into the mRMR-D algorithm
+  *************/
   
   for (i = 1; i < k; i++)
   {
-    score = 0.0;
-    currentHighestFeature = -1;
+    /****************************************************
+    ** to ensure it selects some features
+    **if this is zero then it will not pick features where the redundancy is greater than the 
+    **relevance
+    ****************************************************/
+    score = -DBL_MAX;
+    currentHighestFeature = 0;
     currentScore = 0.0;
     totalFeatureMI = 0.0;
     
@@ -128,42 +124,47 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
       /*if we haven't selected j*/
       if (selectedFeatures[j] == 0)
       {
-        currentScore = 0.0;
+        currentScore = classMI[j];
         totalFeatureMI = 0.0;
         
-        /*double calculateConditionalMutualInformation(double *firstVector, double *targetVector, double *conditionVector, int vectorLength);*/
-        currentScore = calculateConditionalMutualInformation(feature2D[j],classColumn,conditionVector,noOfSamples);
+        for (x = 0; x < i; x++)
+        {
+          arrayPosition = x*noOfFeatures + j;
+          if (featureMIMatrix[arrayPosition] == -1)
+          {
+            /*work out intra MI*/
+            
+            /*double discAndCalcMutualInformation(double *firstVector, double *secondVector, int vectorLength);*/
+            featureMIMatrix[arrayPosition] = discAndCalcMutualInformation(feature2D[(int) outputFeatures[x]], feature2D[j], noOfSamples);
+          }
+          
+          totalFeatureMI += featureMIMatrix[arrayPosition];
+        }/*for the number of already selected features*/
         
-			  if (currentScore > score)
-			  {
-				  score = currentScore;
-				  currentHighestFeature = j;
-			  }
-			}/*if j is unselected*/
-	  }/*for number of features*/
+        currentScore -= (totalFeatureMI/i);
+        if (currentScore > score)
+		{
+		  score = currentScore;
+		  currentHighestFeature = j;
+		}
+	  }/*if j is unselected*/
+	}/*for number of features*/
   
+    selectedFeatures[currentHighestFeature] = 1;
     outputFeatures[i] = currentHighestFeature;
-    
-    if (currentHighestFeature != -1)
-    {
-      selectedFeatures[currentHighestFeature] = 1;
-      mergeArrays(feature2D[currentHighestFeature],conditionVector,conditionVector,noOfSamples);
-    }
   
   }/*for the number of features to select*/
   
   FREE_FUNC(classMI);
-  FREE_FUNC(conditionVector);
   FREE_FUNC(feature2D);
   FREE_FUNC(featureMIMatrix);
   FREE_FUNC(selectedFeatures);
   
   classMI = NULL;
-  conditionVector = NULL;
   feature2D = NULL;
   featureMIMatrix = NULL;
   selectedFeatures = NULL;
-
+  
   return outputFeatures;
-}/*CondMI(int,int,int,double[][],double[],double[])*/
+}/*mRMR(int,int,int,double[][],double[],double[])*/
 

@@ -1,13 +1,12 @@
 /*******************************************************************************
-** CMIM.c, implements a discrete version of the 
-** Conditional Mutual Information Maximisation criterion, using the fast
-** exact implementation from
-**
-** "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
-** F. Fleuret, JMLR (2004)
+** DISR.c, implements the Double Input Symmetrical Relevance criterion
+** from
+** 
+** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
+** P. Meyer and G. Bontempi, (2006)
 **
 ** Initial Version - 13/06/2008
-** Updated - 23/06/2011 - Patched first feature selection error.
+** Updated - 23/06/2011
 ** Updated - 22/02/2014 - Moved feature index increment to mex code.
 ** Updated - 22/02/2014 - Patched calloc.
 ** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
@@ -50,41 +49,61 @@
 **
 *******************************************************************************/
 
-#include "FSAlgorithms.h"
-#include "FSToolbox.h"
+#include "FEAST/FSAlgorithms.h"
+#include "FEAST/FSToolbox.h"
 
 /* MIToolbox includes */
-#include "ArrayOperations.h"
-#include "MutualInformation.h"
-  
-double* CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+#include "MIToolbox/MutualInformation.h"
+#include "MIToolbox/Entropy.h"
+#include "MIToolbox/ArrayOperations.h"
+
+double* DISR(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
 {
-  /*holds the class MI values
-  **the class MI doubles as the partial score from the CMIM paper
-  */
-  double *classMI = (double *)checkedCalloc(noOfFeatures,sizeof(double));
-  /*in the CMIM paper, m = lastUsedFeature*/
-  int *lastUsedFeature = (int *)checkedCalloc(noOfFeatures,sizeof(int));
+  /*holds the class MI values*/
+  double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
   
-  double score, conditionalInfo;
-  int iMinus, currentFeature;
+  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
+  
+  /*holds the intra feature MI values*/
+  int sizeOfMatrix = k*noOfFeatures;
+  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
   
   /*Changed to ensure it always picks a feature*/
   double maxMI = -1.0;
   int maxMICounter = -1;
   
-  int j,i;
-
   double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+  
+  double score, currentScore;
+  int currentHighestFeature;
+  
+  int *mergedVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  int *labelColumn = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  
+  int arrayPosition;
+  double mi, tripEntropy;
+  
+  int i,j,x;
 
+  normaliseArray(classColumn,labelColumn,noOfSamples);
+  
   for(j = 0; j < noOfFeatures; j++)
   {
     feature2D[j] = featureMatrix + (int)j*noOfSamples;
   }
   
-  for (i = 0; i < noOfFeatures;i++)
+  for (i = 0; i < sizeOfMatrix;i++)
   {
-    classMI[i] = calculateMutualInformation(feature2D[i], classColumn, noOfSamples);
+    featureMIMatrix[i] = -1;
+  }/*for featureMIMatrix - blank to -1*/
+
+
+  for (i = 0; i < noOfFeatures;i++)
+  {    
+    /*calculate mutual info
+    **double discAndCalcMutualInformation(double *firstVector, double *secondVector, int vectorLength);
+    */
+    classMI[i] = discAndCalcMutualInformation(feature2D[i], classColumn, noOfSamples);
     
     if (classMI[i] > maxMI)
     {
@@ -93,49 +112,74 @@ double* CMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, do
     }/*if bigger than current maximum*/
   }/*for noOfFeatures - filling classMI*/
   
+  selectedFeatures[maxMICounter] = 1;
   outputFeatures[0] = maxMICounter;
   
   /*****************************************************************************
   ** We have populated the classMI array, and selected the highest
   ** MI feature as the first output feature
-  ** Now we move into the CMIM algorithm
+  ** Now we move into the DISR algorithm
   *****************************************************************************/
   
   for (i = 1; i < k; i++)
   {
     score = 0.0;
-    iMinus = i-1;
+    currentHighestFeature = 0;
+    currentScore = 0.0;
     
     for (j = 0; j < noOfFeatures; j++)
     {
-      while ((classMI[j] > score) && (lastUsedFeature[j] < i))
+      /*if we haven't selected j*/
+      if (selectedFeatures[j] == 0)
       {
-        /*double calculateConditionalMutualInformation(double *firstVector, double *targetVector, double *conditionVector, int vectorLength);*/
-        currentFeature = (int) outputFeatures[lastUsedFeature[j]];
-        conditionalInfo = calculateConditionalMutualInformation(feature2D[j],classColumn,feature2D[currentFeature],noOfSamples);
-        if (classMI[j] > conditionalInfo)
+        currentScore = 0.0;
+        
+        for (x = 0; x < i; x++)
         {
-          classMI[j] = conditionalInfo;
-        }/*reset classMI*/
-        /*moved due to C indexing from 0 rather than 1*/
-        lastUsedFeature[j] += 1;
-      }/*while partial score greater than score & not reached last feature*/
-      if (classMI[j] > score)
-      {
-        score = classMI[j];
-        outputFeatures[i] = j;
-      }/*if partial score still greater than score*/
-	}/*for number of features*/
+          arrayPosition = x*noOfFeatures + j;
+          if (featureMIMatrix[arrayPosition] == -1)
+          {
+            /*
+            **double discAndCalcMutualInformation(double *firstVector, double *secondVector, int vectorLength);
+            **double discAndCalcJointEntropy(double *firstVector, double *secondVector, int vectorLength);
+            */
+            
+            discAndMergeArrays(feature2D[(int) outputFeatures[x]], feature2D[j],mergedVector,noOfSamples);
+            mi = calcMutualInformation(mergedVector, labelColumn, noOfSamples);
+            tripEntropy = calcJointEntropy(mergedVector, labelColumn, noOfSamples);
+            
+            featureMIMatrix[arrayPosition] = mi / tripEntropy;
+          }/*if not already known*/
+          currentScore += featureMIMatrix[arrayPosition];
+        }/*for the number of already selected features*/
+        
+        if (currentScore > score)
+		{
+		  score = currentScore;
+		  currentHighestFeature = j;
+		}
+	  }/*if j is unselected*/
+    }/*for number of features*/
+  
+    selectedFeatures[currentHighestFeature] = 1;
+    outputFeatures[i] = currentHighestFeature;
+  
   }/*for the number of features to select*/
   
   FREE_FUNC(classMI);
-  FREE_FUNC(lastUsedFeature);
+  FREE_FUNC(mergedVector);
+  FREE_FUNC(labelColumn);
   FREE_FUNC(feature2D);
-
+  FREE_FUNC(featureMIMatrix);
+  FREE_FUNC(selectedFeatures);
+  
   classMI = NULL;
-  lastUsedFeature = NULL;
+  mergedVector = NULL;
+  labelColumn = NULL;
   feature2D = NULL;
-
+  featureMIMatrix = NULL;
+  selectedFeatures = NULL;
+  
   return outputFeatures;
-}/*CMIM(int,int,int,double[][],double[],double[])*/
+}/*DISR(int,int,int,double[][],double[],double[])*/
 

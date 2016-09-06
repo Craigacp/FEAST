@@ -43,10 +43,10 @@
 **
 *******************************************************************************/
 
-#include "FSToolbox.h"
-#include "FSAlgorithms.h"
-#include "ArrayOperations.h"
-#include "Entropy.h"
+#include "FEAST/FSToolbox.h"
+#include "FEAST/FSAlgorithms.h"
+#include "MIToolbox/ArrayOperations.h"
+#include "MIToolbox/Entropy.h"
 
 /******************************************************************************
 ** entry point for the mex call
@@ -143,7 +143,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     targets = mxGetPr(prhs[3]);
         
     /*double calculateEntropy(double *dataVector, int vectorLength)*/
-    entropyTest = calculateEntropy(targets,numberOfSamples);
+    entropyTest = discAndCalcEntropy(targets,numberOfSamples);
     if (entropyTest < 0.0000001)
     {
       printf("The class label Y has entropy of 0, therefore all mutual informations containing Y will be 0. No feature selection is performed\n");
