@@ -1,7 +1,7 @@
 FEAST
 =====
 
-A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v1.1.4.
+A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v2.0.0.
 
 FEAST provides implementations of common mutual information based filter
 feature selection algorithms, and an implementation of RELIEF. All functions
@@ -11,14 +11,22 @@ developed to help our research into the similarities between these algorithms,
 and our results are presented in the following paper:
 
  Conditional Likelihood Maximisation: A Unifying Framework for Information Theoretic Feature Selection
- G. Brown, A. Pocock, M.-J.Zhao, M. Lujan
+ G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
  Journal of Machine Learning Research, 13:27-66 (2012)
 
-If you use these implementations for academic research please cite the paper
+The weighted feature selection algorithms are described in:
+
+ Information Theoretic Feature Selection for Cost-Sensitive Problems
+ A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown.
+
+If you use these implementations for academic research please cite the relevant paper
 above.  All FEAST code is licensed under the BSD 3-Clause License.
 
 Contains implementations of:
    mim, mrmr, mifs, cmim, jmi, disr, cife, icap, condred, cmi, relief, fcbf, betagamma
+
+And weighted implementations of:
+   mim, cmim, jmi, disr, cmi
 
 References for these algorithms are provided in the accompanying feast.bib file
 (in BibTeX format).
@@ -87,6 +95,7 @@ Compilation instructions:
  - Linux C shared library - use the included makefile
 
 Update History
+ - xx/09/2016 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability.
  - 12/03/2016 - v1.1.4 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
  - 12/10/2014 - v1.1.2 - Updated documentation to note that FEAST expects column-major matrices.
  - 11/06/2014 - v1.1.1 - Fixed an issue where MIM wasn't compiled into libFSToolbox.
