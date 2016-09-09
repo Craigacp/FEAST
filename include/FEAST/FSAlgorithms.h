@@ -70,6 +70,8 @@
 #ifndef __FSAlgorithms_H
 #define __FSAlgorithms_H
 
+#include "MIToolbox/MIToolbox.h"
+
 /*******************************************************************************
 ** mRMR_D() implements the minimum Relevance Maximum Redundancy criterion
 ** using the difference variant, from
@@ -77,7 +79,8 @@
 ** "Feature Selection Based on Mutual Information: Criteria of Max-Dependency, Max-Relevance, and Min-Redundancy"
 ** H. Peng et al. IEEE Pattern Analysis and Machine Intelligence (PAMI) (2005)
 *******************************************************************************/
-double* mRMR_D(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures);
+uint* mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures);
+double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures);
 
 /*******************************************************************************
 ** CMIM() implements a discrete version of the 

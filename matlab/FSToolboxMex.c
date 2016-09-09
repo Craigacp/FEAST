@@ -178,7 +178,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 output = (double *)mxGetPr(plhs[0]);
                 
                 /*void mRMR_D(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
-                mRMR_D(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
+                disc_mRMR_D(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,output);
 
                 incrementVector(output,k);
                 break;
