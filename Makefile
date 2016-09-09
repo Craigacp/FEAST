@@ -41,7 +41,7 @@ CFLAGS = -O3 -fPIC -std=c89 -Wall -Werror
 CC = gcc
 LINKER = gcc
 INCLUDES = -I../MIToolbox/include -Iinclude
-objects = build/mRMR_D.o build/CMIM.o build/JMI.o build/DISR.o build/CondMI.o build/ICAP.o build/BetaGamma.o build/MIM.o
+objects = build/mRMR_D.o build/CMIM.o build/JMI.o build/DISR.o build/CondMI.o build/ICAP.o build/BetaGamma.o build/MIM.o build/WeightedCMIM.o build/WeightedJMI.o build/WeightedDISR.o build/WeightedCondMI.o
 
 libFSToolbox.so : $(objects)
 	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
