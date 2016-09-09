@@ -10,14 +10,19 @@ and they return the selected feature indices. These implementations were
 developed to help our research into the similarities between these algorithms,
 and our results are presented in the following paper:
 
+```
  Conditional Likelihood Maximisation: A Unifying Framework for Information Theoretic Feature Selection
  G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
  Journal of Machine Learning Research, 13:27-66 (2012)
+```
 
 The weighted feature selection algorithms are described in:
 
+```
  Information Theoretic Feature Selection for Cost-Sensitive Problems
  A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown.
+ ArXiv
+```
 
 If you use these implementations for academic research please cite the relevant paper
 above.  All FEAST code is licensed under the BSD 3-Clause License.
