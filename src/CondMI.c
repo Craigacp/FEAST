@@ -61,10 +61,6 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   
   char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
   
-  /*holds the intra feature MI values*/
-  int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
-  
   /*Changed to ensure it always picks a feature*/
   double maxMI = -1.0;
   int maxMICounter = -1;
@@ -82,16 +78,16 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   
   normaliseArray(classColumn,labelColumn,noOfSamples);
 
-  for(j = 0; j < noOfFeatures; j++)
+  for (j = 0; j < k; j++) 
+  {
+    outputFeatures[j] = -1;
+  }
+
+  for (j = 0; j < noOfFeatures; j++)
   {
     feature2D[j] = featureMatrix + (int)j*noOfSamples;
   }
   
-  for (i = 0; i < sizeOfMatrix;i++)
-  {
-    featureMIMatrix[i] = -1;
-  }/*for featureMIMatrix - blank to -1*/
-
   for (i = 0; i < noOfFeatures;i++)
   {    
     /*calculate mutual info
@@ -158,7 +154,6 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   FREE_FUNC(normalisedVector);
   FREE_FUNC(labelColumn);
   FREE_FUNC(feature2D);
-  FREE_FUNC(featureMIMatrix);
   FREE_FUNC(selectedFeatures);
   
   classMI = NULL;
@@ -166,7 +161,6 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
   normalisedVector = NULL;
   labelColumn = NULL;
   feature2D = NULL;
-  featureMIMatrix = NULL;
   selectedFeatures = NULL;
 
   return outputFeatures;
