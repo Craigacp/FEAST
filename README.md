@@ -31,6 +31,14 @@ And weighted implementations of:
 References for these algorithms are provided in the accompanying feast.bib file
 (in BibTeX format).
 
+FEAST works on discrete inputs, and all continuous values **must** be
+discretised before use with FEAST.  In our experiments we've found that using
+10 equal width bins is suitable for many problems, though this is data set size
+dependent. FEAST produces unreliable results when used with continuous inputs,
+runs slowly and uses much more memory than usual. The discrete inputs should
+have small cardinality, FEAST will treat values {1,10,100} the same way it
+treats {1,2,3} and the latter will be both faster and use less memory.
+
 MATLAB Example (using "data" as our feature matrix, and "labels" as the class label vector):
 
 ```
