@@ -71,8 +71,8 @@ double *WeightedJMI(int k, int noOfSamples, int noOfFeatures, double *featureMat
   double score, currentScore;
   int currentHighestFeature;
   
-  int *mergedVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
-  int *labelColumn = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  uint *mergedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+  uint *labelColumn = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
   
   int arrayPosition;
   double mi;
@@ -154,11 +154,6 @@ double *WeightedJMI(int k, int noOfSamples, int noOfFeatures, double *featureMat
     outputFeatures[i] = currentHighestFeature;
   
   }/*for the number of features to select*/
-  
-  for (i = 0; i < k; i++)
-  {
-    outputFeatures[i] += 1; /*C indexes from 0 not 1*/
-  }/*for number of selected features*/
 
   FREE_FUNC(classMI);
   FREE_FUNC(feature2D);

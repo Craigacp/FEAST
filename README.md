@@ -87,9 +87,9 @@ compiler, except for MIM, FCBF and RELIEF, which are written in MATLAB/OCTAVE
 script. There is a different implementation of MIM available for use in the C
 library.
 
-MIToolbox is required to compile these algorithms, and these implementations
-supercede the example implementations given in that package (they have more
-robust behaviour when used with unexpected inputs).
+MIToolbox v3.0.0 is required to compile these algorithms, and these
+implementations supercede the example implementations given in that package
+(they have more robust behaviour when used with unexpected inputs).
 
 MIToolbox can be found at: http://www.github.com/Craigacp/MIToolbox/
 

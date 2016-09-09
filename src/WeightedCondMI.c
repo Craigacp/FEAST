@@ -68,9 +68,9 @@ double* WeightedCondMI(int k, int noOfSamples, int noOfFeatures, double *feature
   double score, currentScore;
   int currentHighestFeature;
   
-  int *conditionVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
-  int *labelColumn = (int *) checkedCalloc(noOfSamples,sizeof(int));
-  int *normalisedVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  uint *conditionVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+  uint *labelColumn = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+  uint *normalisedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
   
   int i,j;
   

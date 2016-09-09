@@ -75,8 +75,8 @@ double* JMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, dou
   double score, currentScore;
   int currentHighestFeature;
   
-  int *mergedVector = (int *) checkedCalloc(noOfSamples,sizeof(int));
-  int *labelColumn = (int *) checkedCalloc(noOfSamples,sizeof(int));
+  uint *mergedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+  uint *labelColumn = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
   
   int arrayPosition;
   double mi;
