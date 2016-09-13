@@ -68,15 +68,18 @@
 #ifndef __WFSAlgorithms_H
 #define __WFSAlgorithms_H
 
+#include "MIToolbox/MIToolbox.h"
+
 /*******************************************************************************
-** WeightedCMIM() implements a discrete version of the 
+** weightedCMIM() implements a discrete version of the 
 ** Conditional Mutual Information Maximisation criterion, using the fast
 ** exact implementation from
 **
 ** "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
 ** F. Fleuret, JMLR (2004)
 *******************************************************************************/
-double* WeightedCMIM(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
+double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
 
 /*******************************************************************************
 ** WeightedJMI() implements the JMI criterion from
@@ -84,21 +87,23 @@ double* WeightedCMIM(int k, int noOfSamples, int noOfFeatures, double *featureMa
 ** "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
 ** H. Yang and J. Moody, NIPS (1999)
 *******************************************************************************/
-double* WeightedJMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
+double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
 
 /*******************************************************************************
-** WeightedDISR() implements the Double Input Symmetrical Relevance criterion
+** weightedDISR() implements the Double Input Symmetrical Relevance criterion
 ** from
 ** 
 ** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
 ** P. Meyer and G. Bontempi, (2006)
 *******************************************************************************/
-double* WeightedDISR(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
-
+uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
+double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
 
 /*******************************************************************************
-** WeightedCondMI() implements the CMI criterion using a greedy forward search
+** weightedCondMI() implements the CMI criterion using a greedy forward search
 *******************************************************************************/
-double* WeightedCondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
+double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
 
 #endif

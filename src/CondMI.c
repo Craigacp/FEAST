@@ -54,29 +54,24 @@
 #include "MIToolbox/MutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+uint* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures)
 {
+  uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
+
   /*holds the class MI values*/
   double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
-  
-  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
   
   /*Changed to ensure it always picks a feature*/
   double maxMI = -1.0;
   int maxMICounter = -1;
   
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  
   double score, currentScore;
   int currentHighestFeature;
   
   uint *conditionVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *labelColumn = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *normalisedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
   
   int i,j;
-  
-  normaliseArray(classColumn,labelColumn,noOfSamples);
 
   for (j = 0; j < k; j++) 
   {
@@ -85,15 +80,15 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
 
   for (j = 0; j < noOfFeatures; j++)
   {
-    feature2D[j] = featureMatrix + (int)j*noOfSamples;
+    feature2D[j] = featureMatrix + j*noOfSamples;
   }
   
   for (i = 0; i < noOfFeatures;i++)
   {    
     /*calculate mutual info
-    **double discAndCalcMutualInformation(double *firstVector, double *secondVector, int vectorLength);
+    **double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);
     */
-    classMI[i] = discAndCalcMutualInformation(feature2D[i], classColumn, noOfSamples);
+    classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
     
     if (classMI[i] > maxMI)
     {
@@ -126,9 +121,8 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
       {
         currentScore = 0.0;
         
-        /*double calcConditionalMutualInformation(int *firstVector, int *targetVector, int *conditionVector, int vectorLength);*/
-        normaliseArray(feature2D[j],normalisedVector,noOfSamples);
-        currentScore = calcConditionalMutualInformation(normalisedVector,labelColumn,conditionVector,noOfSamples);
+        /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
+        currentScore = calcConditionalMutualInformation(feature2D[j],classColumn,conditionVector,noOfSamples);
         
         if (currentScore > score)
         {
@@ -143,26 +137,62 @@ double* CondMI(int k, int noOfSamples, int noOfFeatures, double *featureMatrix, 
     if (currentHighestFeature != -1)
     {
       selectedFeatures[currentHighestFeature] = 1;
-      normaliseArray(feature2D[currentHighestFeature],normalisedVector,noOfSamples);
-      mergeArrays(normalisedVector,conditionVector,conditionVector,noOfSamples);
+      mergeArrays(feature2D[currentHighestFeature],conditionVector,conditionVector,noOfSamples);
     }
   
   }/*for the number of features to select*/
   
   FREE_FUNC(classMI);
   FREE_FUNC(conditionVector);
-  FREE_FUNC(normalisedVector);
-  FREE_FUNC(labelColumn);
   FREE_FUNC(feature2D);
   FREE_FUNC(selectedFeatures);
   
   classMI = NULL;
   conditionVector = NULL;
-  normalisedVector = NULL;
-  labelColumn = NULL;
   feature2D = NULL;
   selectedFeatures = NULL;
 
   return outputFeatures;
-}/*CondMI(int,int,int,double[][],double[],double[])*/
+}/*CondMI(uint,uint,uint,uint[][],uint[],uint[])*/
+
+double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
+{
+  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+
+  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+
+  int i;
+  
+  for (i = 0; i < noOfFeatures; i++)
+  {
+    feature2D[i] = featureMatrix + i*noOfSamples;
+    intFeature2D[i] = intFeatures + i*noOfSamples;
+    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+  }
+
+  normaliseArray(classColumn,intClass,noOfSamples);
+
+  CondMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+
+  for (i = 0; i < k; i++) {
+      outputFeatures[i] = intOutputs[i];
+  }
+
+  FREE_FUNC(intFeatures);
+  FREE_FUNC(intClass);
+  FREE_FUNC(intOutputs);
+  FREE_FUNC(feature2D);
+  FREE_FUNC(intFeature2D);
+
+  intFeatures = NULL;
+  intClass = NULL;
+  intOutputs = NULL;
+  feature2D = NULL;
+  intFeature2D = NULL;
+
+  return outputFeatures;
+}/*discCondMI(int,int,int,double[][],double[],double[])*/
 

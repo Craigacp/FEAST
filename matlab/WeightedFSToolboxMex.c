@@ -1,5 +1,5 @@
 /*******************************************************************************
-** FSToolboxMex.c is the entry point for the feature selection toolbox.
+** WeightedFSToolboxMex.c is the entry point for the feature selection toolbox.
 ** It provides a MATLAB interface to the various selection algorithms.
 **
 ** Initial Version - 27/06/2011
@@ -152,8 +152,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
                 output = (double *)mxGetPr(plhs[0]);
                 
-                /*void CMIM(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
-                WeightedCMIM(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
+                discWeightedCMIM(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
 
                 incrementVector(output,k);
                 break;
@@ -163,8 +162,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
                 output = (double *)mxGetPr(plhs[0]);
                
-                /*void JMI(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
-                WeightedJMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
+                discWeightedJMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
 
                 incrementVector(output,k);
                 break;
@@ -173,9 +171,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             {
                 plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
                 output = (double *)mxGetPr(plhs[0]);
-                
-                /*void DISR(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
-                WeightedDISR(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
+
+                discWeightedDISR(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
 
                 incrementVector(output,k);
                 break;
@@ -184,8 +181,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             {
                 output = (double *)mxCalloc(k,sizeof(double));
 
-                /*void CondMI(int k, int noOfSamples, int noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures)*/
-                WeightedCondMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
+                discWeightedCondMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
 
                 i = 0;
 
