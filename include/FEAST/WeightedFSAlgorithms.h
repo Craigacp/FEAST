@@ -102,8 +102,11 @@ double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *fe
 
 /*******************************************************************************
 ** weightedCondMI() implements the CMI criterion using a greedy forward search
+**
+** It returns an int array, not a uint array, as -1 is a sentinel value signifying
+** there was not enough information to select a feature.
 *******************************************************************************/
-uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
+uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures);
 double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
 
 #endif

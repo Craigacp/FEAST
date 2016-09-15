@@ -123,8 +123,11 @@ double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
 
 /*******************************************************************************
 ** CondMI() implements the CMI criterion using a greedy forward search
+**
+** It returns an int array, not a uint array, as -1 is a sentinel value signifying
+** there was not enough information to select a feature.
 *******************************************************************************/
-uint* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures);
+uint* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures);
 double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures);
 
 /*******************************************************************************

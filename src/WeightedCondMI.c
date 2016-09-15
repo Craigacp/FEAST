@@ -52,7 +52,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures)
+uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures)
 {
   uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
   char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
@@ -151,13 +151,13 @@ uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureM
   selectedFeatures = NULL;
 
   return outputFeatures;
-}/*weightedCondMI(uint,uint,uint,uint[][],uint[],double[],uint[])*/
+}/*weightedCondMI(uint,uint,uint,uint[][],uint[],double[],int[])*/
 
 double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures)
 {
   uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
   uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+  int *intOutputs = (int *) checkedCalloc(k,sizeof(int));
 
   double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
   uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
