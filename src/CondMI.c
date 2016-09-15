@@ -54,7 +54,7 @@
 #include "MIToolbox/MutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures)
+int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures)
 {
   uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
   char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));

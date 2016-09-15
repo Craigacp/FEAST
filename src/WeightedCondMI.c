@@ -52,7 +52,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-uint* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures)
+int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures)
 {
   uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
   char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
