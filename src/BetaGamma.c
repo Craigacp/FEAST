@@ -61,178 +61,165 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double betaParam, double gammaParam)
-{
+uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double betaParam, double gammaParam) {
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
-    
+
     /*holds the class MI values*/
     double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
-    
+
     /*holds the intra feature MI values*/
     int sizeOfMatrix = k*noOfFeatures;
     double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
-    
+
     /*Changed to ensure it always picks a feature*/
     double maxMI = -1.0;
     int maxMICounter = -1;
-    
+
     double score, currentScore, totalFeatureMI;
     int currentHighestFeature, arrayPosition;
-   
-    int i,j,m;
+
+    int i, j, m;
 
     /***********************************************************
-    ** because the array is passed as
-    **  s a m p l e s
-    ** f
-    ** e
-    ** a
-    ** t
-    ** u
-    ** r
-    ** e
-    ** s
-    ** 
-    ** this pulls out a pointer to the first sample of
-    ** each feature and stores it as a multidimensional array
-    ** so it can be indexed nicely
-    ***********************************************************/
-    for(j = 0; j < noOfFeatures; j++)
-    {
+     ** because the array is passed as
+     **  s a m p l e s
+     ** f
+     ** e
+     ** a
+     ** t
+     ** u
+     ** r
+     ** e
+     ** s
+     ** 
+     ** this pulls out a pointer to the first sample of
+     ** each feature and stores it as a multidimensional array
+     ** so it can be indexed nicely
+     ***********************************************************/
+    for (j = 0; j < noOfFeatures; j++) {
         feature2D[j] = featureMatrix + j*noOfSamples;
     }
 
-    for (i = 0; i < sizeOfMatrix; i++)
-    {
+    for (i = 0; i < sizeOfMatrix; i++) {
         featureMIMatrix[i] = -1;
     }/*for featureMIMatrix - blank to -1*/
-    
+
     /***********************************************************
-    ** SETUP COMPLETE
-    ** Algorithm starts here
-    ***********************************************************/
-    
-    for (i = 0; i < noOfFeatures; i++)
-    {
+     ** SETUP COMPLETE
+     ** Algorithm starts here
+     ***********************************************************/
+
+    for (i = 0; i < noOfFeatures; i++) {
         classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
-        
-        if (classMI[i] > maxMI)
-        {
+
+        if (classMI[i] > maxMI) {
             maxMI = classMI[i];
             maxMICounter = i;
         }/*if bigger than current maximum*/
     }/*for noOfFeatures - filling classMI*/
-    
+
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
-    
-  /*************
-   ** Now we have populated the classMI array, and selected the highest
-   ** MI feature as the first output feature
-   ** Now we move into the JMI algorithm
-   *************/
-    
-    for (i = 1; i < k; i++)
-    {
+
+    /*************
+     ** Now we have populated the classMI array, and selected the highest
+     ** MI feature as the first output feature
+     ** Now we move into the JMI algorithm
+     *************/
+
+    for (i = 1; i < k; i++) {
         /************************************************************
-        ** to ensure it selects some features
-        ** if this is zero then it will not pick features where the 
-        ** redundancy is greater than the relevance
-        ************************************************************/
+         ** to ensure it selects some features
+         ** if this is zero then it will not pick features where the 
+         ** redundancy is greater than the relevance
+         ************************************************************/
         score = -DBL_MAX;
         currentHighestFeature = 0;
         currentScore = 0.0;
         totalFeatureMI = 0.0;
-        
-        for (j = 0; j < noOfFeatures; j++)
-        {
+
+        for (j = 0; j < noOfFeatures; j++) {
             /*if we haven't selected j*/
-            if (!selectedFeatures[j])
-            {
+            if (!selectedFeatures[j]) {
                 currentScore = classMI[j];
                 totalFeatureMI = 0.0;
-                
-                for (m = 0; m < i; m++)
-                {
-                    arrayPosition = m*noOfFeatures + j;
-                    if (featureMIMatrix[arrayPosition] == -1)
-                    {
+
+                for (m = 0; m < i; m++) {
+                    arrayPosition = m * noOfFeatures + j;
+                    if (featureMIMatrix[arrayPosition] == -1) {
                         /*double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);*/
-                        featureMIMatrix[arrayPosition] = betaParam*calcMutualInformation(feature2D[(int) outputFeatures[m]], feature2D[j], noOfSamples);
-                        
+                        featureMIMatrix[arrayPosition] = betaParam * calcMutualInformation(feature2D[outputFeatures[m]], feature2D[j], noOfSamples);
+
                         /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
-                        featureMIMatrix[arrayPosition] -= gammaParam*calcConditionalMutualInformation(feature2D[(int) outputFeatures[m]], feature2D[j], classColumn, noOfSamples);
+                        featureMIMatrix[arrayPosition] -= gammaParam * calcConditionalMutualInformation(feature2D[outputFeatures[m]], feature2D[j], classColumn, noOfSamples);
                     }/*if not already known*/
-                    
+
                     totalFeatureMI += featureMIMatrix[arrayPosition];
                 }/*for the number of already selected features*/
-                
+
                 currentScore -= (totalFeatureMI);
 
-                if (currentScore > score)
-                {
+                if (currentScore > score) {
                     score = currentScore;
                     currentHighestFeature = j;
                 }
             }/*if j is unselected*/
         }/*for number of features*/
-        
+
         selectedFeatures[currentHighestFeature] = 1;
         outputFeatures[i] = currentHighestFeature;
-        
+
     }/*for the number of features to select*/
-    
-  FREE_FUNC(classMI);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(featureMIMatrix);
-  FREE_FUNC(selectedFeatures);
-  
-  classMI = NULL;
-  feature2D = NULL;
-  featureMIMatrix = NULL;
-  selectedFeatures = NULL;
-  
-  return outputFeatures;
+
+    FREE_FUNC(classMI);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(featureMIMatrix);
+    FREE_FUNC(selectedFeatures);
+
+    classMI = NULL;
+    feature2D = NULL;
+    featureMIMatrix = NULL;
+    selectedFeatures = NULL;
+
+    return outputFeatures;
 }/*BetaGamma(uint,uint,uint,uint[][],uint[],uint[],double,double)*/
 
-double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma)
-{
-  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
-  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma) {
+    uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+    uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+    uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+    uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
-  int i;
-  
-  for (i = 0; i < noOfFeatures; i++)
-  {
-    feature2D[i] = featureMatrix + i*noOfSamples;
-    intFeature2D[i] = intFeatures + i*noOfSamples;
-    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
-  }
+    int i;
 
-  normaliseArray(classColumn,intClass,noOfSamples);
+    for (i = 0; i < noOfFeatures; i++) {
+        feature2D[i] = featureMatrix + i*noOfSamples;
+        intFeature2D[i] = intFeatures + i*noOfSamples;
+        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+    }
 
-  BetaGamma(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, beta, gamma);
+    normaliseArray(classColumn,intClass,noOfSamples);
 
-  for (i = 0; i < k; i++) {
-      outputFeatures[i] = intOutputs[i];
-  }
+    BetaGamma(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, beta, gamma);
 
-  FREE_FUNC(intFeatures);
-  FREE_FUNC(intClass);
-  FREE_FUNC(intOutputs);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(intFeature2D);
+    for (i = 0; i < k; i++) {
+        outputFeatures[i] = intOutputs[i];
+    }
 
-  intFeatures = NULL;
-  intClass = NULL;
-  intOutputs = NULL;
-  feature2D = NULL;
-  intFeature2D = NULL;
+    FREE_FUNC(intFeatures);
+    FREE_FUNC(intClass);
+    FREE_FUNC(intOutputs);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(intFeature2D);
 
-  return outputFeatures;
+    intFeatures = NULL;
+    intClass = NULL;
+    intOutputs = NULL;
+    feature2D = NULL;
+    intFeature2D = NULL;
+
+    return outputFeatures;
 }/*discBetaGamma(int,int,int,double[][],double[],double[],beta,gamma)*/

@@ -51,159 +51,145 @@
 #include "MIToolbox/WeightedMutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures)
-{
-  uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint*));
-  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
+uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures) {
+    uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint*));
+    char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
-  /*holds the class MI values*/
-  double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
-  
-  /*holds the intra feature MI values*/
-  int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
-  
-  /*Changed to ensure it always picks a feature*/
-  double maxMI = -1.0;
-  int maxMICounter = -1;
-  
-  double score, currentScore;
-  int currentHighestFeature;
-  
-  uint *mergedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  
-  int arrayPosition;
-  double mi;
-  
-  int i,j,x;
-  
-  for(j = 0; j < noOfFeatures; j++)
-  {
-    feature2D[j] = featureMatrix + j*noOfSamples;
-  }
-  
-  for (i = 0; i < sizeOfMatrix;i++)
-  {
-    featureMIMatrix[i] = -1;
-  }/*for featureMIMatrix - blank to -1*/
+    /*holds the class MI values*/
+    double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
+
+    /*holds the intra feature MI values*/
+    int sizeOfMatrix = k*noOfFeatures;
+    double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
+
+    /*Changed to ensure it always picks a feature*/
+    double maxMI = -1.0;
+    int maxMICounter = -1;
+
+    double score, currentScore;
+    int currentHighestFeature;
+
+    uint *mergedVector = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+
+    int arrayPosition;
+    double mi;
+
+    int i, j, x;
+
+    for (j = 0; j < noOfFeatures; j++) {
+        feature2D[j] = featureMatrix + j*noOfSamples;
+    }
+
+    for (i = 0; i < sizeOfMatrix; i++) {
+        featureMIMatrix[i] = -1;
+    }/*for featureMIMatrix - blank to -1*/
 
 
-  for (i = 0; i < noOfFeatures;i++)
-  {    
-    /*calculate mutual info
-    **double calcWeightedMutualInformation(uint *firstVector, uint *secondVector, double *weightVector int vectorLength);
-    */
-    classMI[i] = calcWeightedMutualInformation(feature2D[i], classColumn, weightVector, noOfSamples);
-    
-    if (classMI[i] > maxMI)
-    {
-      maxMI = classMI[i];
-      maxMICounter = i;
-    }/*if bigger than current maximum*/
-  }/*for noOfFeatures - filling classMI*/
-  
-  selectedFeatures[maxMICounter] = 1;
-  outputFeatures[0] = maxMICounter;
-  
-  /*****************************************************************************
-  ** We have populated the classMI array, and selected the highest
-  ** MI feature as the first output feature
-  ** Now we move into the JMI algorithm
-  *****************************************************************************/
-  
-  for (i = 1; i < k; i++)
-  {
-    score = 0.0;
-    currentHighestFeature = 0;
-    currentScore = 0.0;
-    
-    for (j = 0; j < noOfFeatures; j++)
-    {
-      /*if we haven't selected j*/
-      if (selectedFeatures[j] == 0)
-      {
+    for (i = 0; i < noOfFeatures; i++) {
+        /*calculate mutual info
+         **double calcWeightedMutualInformation(uint *firstVector, uint *secondVector, double *weightVector int vectorLength);
+         */
+        classMI[i] = calcWeightedMutualInformation(feature2D[i], classColumn, weightVector, noOfSamples);
+
+        if (classMI[i] > maxMI) {
+            maxMI = classMI[i];
+            maxMICounter = i;
+        }/*if bigger than current maximum*/
+    }/*for noOfFeatures - filling classMI*/
+
+    selectedFeatures[maxMICounter] = 1;
+    outputFeatures[0] = maxMICounter;
+
+    /*****************************************************************************
+     ** We have populated the classMI array, and selected the highest
+     ** MI feature as the first output feature
+     ** Now we move into the JMI algorithm
+     *****************************************************************************/
+
+    for (i = 1; i < k; i++) {
+        score = 0.0;
+        currentHighestFeature = 0;
         currentScore = 0.0;
-        
-        for (x = 0; x < i; x++)
-        {
-          arrayPosition = x*noOfFeatures + j;
-          if (featureMIMatrix[arrayPosition] == -1)
-          {
-            mergeArrays(feature2D[outputFeatures[x]], feature2D[j],mergedVector,noOfSamples);
-            /*double calcWeightedMutualInformation(uint *firstVector, uint *secondVector, double *weightVector, int vectorLength);*/
-            mi = calcWeightedMutualInformation(mergedVector, classColumn, weightVector, noOfSamples);
-            
-            featureMIMatrix[arrayPosition] = mi;
-          }/*if not already known*/
-          currentScore += featureMIMatrix[arrayPosition];
-        }/*for the number of already selected features*/
-        
-        if (currentScore > score)
-		{
-		  score = currentScore;
-		  currentHighestFeature = j;
-		}
-	  }/*if j is unselected*/
-    }/*for number of features*/
-  
-    selectedFeatures[currentHighestFeature] = 1;
-    outputFeatures[i] = currentHighestFeature;
-  
-  }/*for the number of features to select*/
 
-  FREE_FUNC(classMI);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(featureMIMatrix);
-  FREE_FUNC(mergedVector);
-  FREE_FUNC(selectedFeatures);
-  
-  classMI = NULL;
-  feature2D = NULL;
-  featureMIMatrix = NULL;
-  mergedVector = NULL;
-  selectedFeatures = NULL;
+        for (j = 0; j < noOfFeatures; j++) {
+            /*if we haven't selected j*/
+            if (selectedFeatures[j] == 0) {
+                currentScore = 0.0;
 
-  return outputFeatures;  
+                for (x = 0; x < i; x++) {
+                    arrayPosition = x * noOfFeatures + j;
+                    if (featureMIMatrix[arrayPosition] == -1) {
+                        mergeArrays(feature2D[outputFeatures[x]], feature2D[j], mergedVector, noOfSamples);
+                        /*double calcWeightedMutualInformation(uint *firstVector, uint *secondVector, double *weightVector, int vectorLength);*/
+                        mi = calcWeightedMutualInformation(mergedVector, classColumn, weightVector, noOfSamples);
+
+                        featureMIMatrix[arrayPosition] = mi;
+                    }/*if not already known*/
+                    currentScore += featureMIMatrix[arrayPosition];
+                }/*for the number of already selected features*/
+
+                if (currentScore > score) {
+                    score = currentScore;
+                    currentHighestFeature = j;
+                }
+            }/*if j is unselected*/
+        }/*for number of features*/
+
+        selectedFeatures[currentHighestFeature] = 1;
+        outputFeatures[i] = currentHighestFeature;
+
+    }/*for the number of features to select*/
+
+    FREE_FUNC(classMI);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(featureMIMatrix);
+    FREE_FUNC(mergedVector);
+    FREE_FUNC(selectedFeatures);
+
+    classMI = NULL;
+    feature2D = NULL;
+    featureMIMatrix = NULL;
+    mergedVector = NULL;
+    selectedFeatures = NULL;
+
+    return outputFeatures;
 }/*weightedJMI(uint,uint,uint,uint[][],uint[],double[],uint[])*/
 
-double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures)
-{
-  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
-  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+    uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+    uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+    uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+    uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
-  int i;
-  
-  for (i = 0; i < noOfFeatures; i++)
-  {
-    feature2D[i] = featureMatrix + i*noOfSamples;
-    intFeature2D[i] = intFeatures + i*noOfSamples;
-    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
-  }
+    int i;
 
-  normaliseArray(classColumn,intClass,noOfSamples);
+    for (i = 0; i < noOfFeatures; i++) {
+        feature2D[i] = featureMatrix + i*noOfSamples;
+        intFeature2D[i] = intFeatures + i*noOfSamples;
+        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+    }
 
-  weightedJMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
+    normaliseArray(classColumn,intClass,noOfSamples);
 
-  for (i = 0; i < k; i++) {
-      outputFeatures[i] = intOutputs[i];
-  }
+    weightedJMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
 
-  FREE_FUNC(intFeatures);
-  FREE_FUNC(intClass);
-  FREE_FUNC(intOutputs);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(intFeature2D);
+    for (i = 0; i < k; i++) {
+        outputFeatures[i] = intOutputs[i];
+    }
 
-  intFeatures = NULL;
-  intClass = NULL;
-  intOutputs = NULL;
-  feature2D = NULL;
-  intFeature2D = NULL;
+    FREE_FUNC(intFeatures);
+    FREE_FUNC(intClass);
+    FREE_FUNC(intOutputs);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(intFeature2D);
 
-  return outputFeatures;
+    intFeatures = NULL;
+    intClass = NULL;
+    intOutputs = NULL;
+    feature2D = NULL;
+    intFeature2D = NULL;
+
+    return outputFeatures;
 }/*discWeightedJMI(int,int,int,double[][],double[],double[],double[])*/
-

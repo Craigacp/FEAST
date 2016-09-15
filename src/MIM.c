@@ -51,54 +51,49 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures)
-{
+uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures) {
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
-    
+
     /*holds the class MI values*/
     double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
 
     /*Changed to ensure it always picks a feature*/
     double maxMI = -1.0;
     int maxMICounter = -1;
-    int i,j;
+    int i, j;
 
     /**********************************************************
-    ** this pulls out a pointer to the first sample of
-    ** each feature and stores it as a multidimensional array
-    ** so it can be indexed nicely
-    ***********************************************************/
-    for(j = 0; j < noOfFeatures; j++)
-    {
+     ** this pulls out a pointer to the first sample of
+     ** each feature and stores it as a multidimensional array
+     ** so it can be indexed nicely
+     ***********************************************************/
+    for (j = 0; j < noOfFeatures; j++) {
         feature2D[j] = featureMatrix + j*noOfSamples;
     }
 
     /***********************************************************
-    ** SETUP COMPLETE
-    ** Algorithm starts here
-    ***********************************************************/
-    
-    for (i = 0; i < noOfFeatures; i++)
-    {
+     ** SETUP COMPLETE
+     ** Algorithm starts here
+     ***********************************************************/
+
+    for (i = 0; i < noOfFeatures; i++) {
         classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
-        
-        if (classMI[i] > maxMI)
-        {
+
+        if (classMI[i] > maxMI) {
             maxMI = classMI[i];
             maxMICounter = i;
         }/*if bigger than current maximum*/
     }/*for noOfFeatures - filling classMI*/
-    
+
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
-    
+
     /**
      * Ideally this should use a quick sort, but it's still quicker than
      * calling BetaGamma with beta=0 and gamma=0
      */
-    for (i = 1; i < k; i++)
-    {
+    for (i = 1; i < k; i++) {
         maxMI = -1.0;
         for (j = 0; j < noOfFeatures; j++) {
             if (!selectedFeatures[j]) {
@@ -111,56 +106,53 @@ uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
         selectedFeatures[maxMICounter] = 1;
         outputFeatures[i] = maxMICounter;
     }/*for the number of features to select*/
-    
-  FREE_FUNC(classMI);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(selectedFeatures);
-  
-  classMI = NULL;
-  feature2D = NULL;
-  selectedFeatures = NULL;
-  
-  return outputFeatures;
+
+    FREE_FUNC(classMI);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(selectedFeatures);
+
+    classMI = NULL;
+    feature2D = NULL;
+    selectedFeatures = NULL;
+
+    return outputFeatures;
 }/*MIM(uint,uint,uint,uint[][],uint[],uint[])*/
 
-double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
-{
-  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
-  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+    uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+    uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+    uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+    uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
-  int i;
-  
-  for (i = 0; i < noOfFeatures; i++)
-  {
-    feature2D[i] = featureMatrix + i*noOfSamples;
-    intFeature2D[i] = intFeatures + i*noOfSamples;
-    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
-  }
+    int i;
 
-  normaliseArray(classColumn,intClass,noOfSamples);
+    for (i = 0; i < noOfFeatures; i++) {
+        feature2D[i] = featureMatrix + i*noOfSamples;
+        intFeature2D[i] = intFeatures + i*noOfSamples;
+        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+    }
 
-  MIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    normaliseArray(classColumn,intClass,noOfSamples);
 
-  for (i = 0; i < k; i++) {
-      outputFeatures[i] = intOutputs[i];
-  }
+    MIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
 
-  FREE_FUNC(intFeatures);
-  FREE_FUNC(intClass);
-  FREE_FUNC(intOutputs);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(intFeature2D);
+    for (i = 0; i < k; i++) {
+        outputFeatures[i] = intOutputs[i];
+    }
 
-  intFeatures = NULL;
-  intClass = NULL;
-  intOutputs = NULL;
-  feature2D = NULL;
-  intFeature2D = NULL;
+    FREE_FUNC(intFeatures);
+    FREE_FUNC(intClass);
+    FREE_FUNC(intOutputs);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(intFeature2D);
 
-  return outputFeatures;
+    intFeatures = NULL;
+    intClass = NULL;
+    intOutputs = NULL;
+    feature2D = NULL;
+    intFeature2D = NULL;
+
+    return outputFeatures;
 }/*discMIM(int,int,int,double[][],double[],double[])*/
-

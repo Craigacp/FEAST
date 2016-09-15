@@ -57,153 +57,139 @@
 #include "MIToolbox/MutualInformation.h"
 
 uint* mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures) {
-  uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
-  /*holds the class MI values*/
-  double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
-  char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
-  /*holds the intra feature MI values*/
-  int sizeOfMatrix = k*noOfFeatures;
-  double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
-  
-  /*Changed to ensure it always picks a feature*/
-  double maxMI = -1.0;
-  int maxMICounter = -1;
-  
-  /*init variables*/
-  
-  double score, currentScore, totalFeatureMI;
-  int currentHighestFeature;
-  
-  int arrayPosition, i, j, x;
-  
-  for(j = 0; j < noOfFeatures; j++)
-  {
-    feature2D[j] = featureMatrix + j*noOfSamples;
-  }
-  
-  for (i = 0; i < sizeOfMatrix;i++)
-  {
-    featureMIMatrix[i] = -1;
-  }/*for featureMIMatrix - blank to -1*/
+    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    /*holds the class MI values*/
+    double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
+    char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
+    /*holds the intra feature MI values*/
+    int sizeOfMatrix = k*noOfFeatures;
+    double *featureMIMatrix = (double *) checkedCalloc(sizeOfMatrix,sizeof(double));
 
-  for (i = 0; i < noOfFeatures;i++)
-  {
-    classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
-    if (classMI[i] > maxMI)
-    {
-      maxMI = classMI[i];
-      maxMICounter = i;
-    }/*if bigger than current maximum*/
-  }/*for noOfFeatures - filling classMI*/
-  
-  selectedFeatures[maxMICounter] = 1;
-  outputFeatures[0] = maxMICounter;
-  
-  /*************
-  ** Now we have populated the classMI array, and selected the highest
-  ** MI feature as the first output feature
-  ** Now we move into the mRMR-D algorithm
-  *************/
-  
-  for (i = 1; i < k; i++)
-  {
-    /****************************************************
-    ** to ensure it selects some features
-    **if this is zero then it will not pick features where the redundancy is greater than the 
-    **relevance
-    ****************************************************/
-    score = -DBL_MAX;
-    currentHighestFeature = 0;
-    currentScore = 0.0;
-    totalFeatureMI = 0.0;
-    
-    for (j = 0; j < noOfFeatures; j++)
-    {
-      /*if we haven't selected j*/
-      if (selectedFeatures[j] == 0)
-      {
-        currentScore = classMI[j];
+    /*Changed to ensure it always picks a feature*/
+    double maxMI = -1.0;
+    int maxMICounter = -1;
+
+    /*init variables*/
+
+    double score, currentScore, totalFeatureMI;
+    int currentHighestFeature;
+
+    int arrayPosition, i, j, x;
+
+    for (j = 0; j < noOfFeatures; j++) {
+        feature2D[j] = featureMatrix + j*noOfSamples;
+    }
+
+    for (i = 0; i < sizeOfMatrix; i++) {
+        featureMIMatrix[i] = -1;
+    }/*for featureMIMatrix - blank to -1*/
+
+    for (i = 0; i < noOfFeatures; i++) {
+        classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
+        if (classMI[i] > maxMI) {
+            maxMI = classMI[i];
+            maxMICounter = i;
+        }/*if bigger than current maximum*/
+    }/*for noOfFeatures - filling classMI*/
+
+    selectedFeatures[maxMICounter] = 1;
+    outputFeatures[0] = maxMICounter;
+
+    /*************
+     ** Now we have populated the classMI array, and selected the highest
+     ** MI feature as the first output feature
+     ** Now we move into the mRMR-D algorithm
+     *************/
+
+    for (i = 1; i < k; i++) {
+        /****************************************************
+        ** to ensure it selects some features
+        **if this is zero then it will not pick features where the redundancy is greater than the 
+        **relevance
+        ****************************************************/
+        score = -DBL_MAX;
+        currentHighestFeature = 0;
+        currentScore = 0.0;
         totalFeatureMI = 0.0;
-        
-        for (x = 0; x < i; x++)
-        {
-          arrayPosition = x*noOfFeatures + j;
-          if (featureMIMatrix[arrayPosition] == -1)
-          {
-            /*work out intra MI*/
-            
-            /*double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);*/
-            featureMIMatrix[arrayPosition] = calcMutualInformation(feature2D[outputFeatures[x]], feature2D[j], noOfSamples);
-          }
-          
-          totalFeatureMI += featureMIMatrix[arrayPosition];
-        }/*for the number of already selected features*/
-        
-        currentScore -= (totalFeatureMI/i);
-        if (currentScore > score)
-		{
-		  score = currentScore;
-		  currentHighestFeature = j;
-		}
-	  }/*if j is unselected*/
-	}/*for number of features*/
-  
-    selectedFeatures[currentHighestFeature] = 1;
-    outputFeatures[i] = currentHighestFeature;
-  
-  }/*for the number of features to select*/
-  
-  FREE_FUNC(classMI);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(featureMIMatrix);
-  FREE_FUNC(selectedFeatures);
-  
-  classMI = NULL;
-  feature2D = NULL;
-  featureMIMatrix = NULL;
-  selectedFeatures = NULL;
-  
-  return outputFeatures;
+
+        for (j = 0; j < noOfFeatures; j++) {
+            /*if we haven't selected j*/
+            if (selectedFeatures[j] == 0) {
+                currentScore = classMI[j];
+                totalFeatureMI = 0.0;
+
+                for (x = 0; x < i; x++) {
+                    arrayPosition = x * noOfFeatures + j;
+                    if (featureMIMatrix[arrayPosition] == -1) {
+                        /*work out intra MI*/
+                        /*double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);*/
+                        featureMIMatrix[arrayPosition] = calcMutualInformation(feature2D[outputFeatures[x]], feature2D[j], noOfSamples);
+                    }
+
+                    totalFeatureMI += featureMIMatrix[arrayPosition];
+                }/*for the number of already selected features*/
+
+                currentScore -= (totalFeatureMI / i);
+                if (currentScore > score) {
+                    score = currentScore;
+                    currentHighestFeature = j;
+                }
+            }/*if j is unselected*/
+        }/*for number of features*/
+
+        selectedFeatures[currentHighestFeature] = 1;
+        outputFeatures[i] = currentHighestFeature;
+
+    }/*for the number of features to select*/
+
+    FREE_FUNC(classMI);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(featureMIMatrix);
+    FREE_FUNC(selectedFeatures);
+
+    classMI = NULL;
+    feature2D = NULL;
+    featureMIMatrix = NULL;
+    selectedFeatures = NULL;
+
+    return outputFeatures;
 }
 
-double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures)
-{
-  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
-  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+    uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+    uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+    uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+    uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
-  int i;
-  
-  for (i = 0; i < noOfFeatures; i++)
-  {
-    feature2D[i] = featureMatrix + i*noOfSamples;
-    intFeature2D[i] = intFeatures + i*noOfSamples;
-    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
-  }
+    int i;
 
-  normaliseArray(classColumn,intClass,noOfSamples);
+    for (i = 0; i < noOfFeatures; i++) {
+        feature2D[i] = featureMatrix + i*noOfSamples;
+        intFeature2D[i] = intFeatures + i*noOfSamples;
+        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+    }
 
-  mRMR_D(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    normaliseArray(classColumn,intClass,noOfSamples);
 
-  for (i = 0; i < k; i++) {
-      outputFeatures[i] = intOutputs[i];
-  }
+    mRMR_D(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
 
-  FREE_FUNC(intFeatures);
-  FREE_FUNC(intClass);
-  FREE_FUNC(intOutputs);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(intFeature2D);
+    for (i = 0; i < k; i++) {
+        outputFeatures[i] = intOutputs[i];
+    }
 
-  intFeatures = NULL;
-  intClass = NULL;
-  intOutputs = NULL;
-  feature2D = NULL;
-  intFeature2D = NULL;
+    FREE_FUNC(intFeatures);
+    FREE_FUNC(intClass);
+    FREE_FUNC(intOutputs);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(intFeature2D);
 
-  return outputFeatures;
+    intFeatures = NULL;
+    intClass = NULL;
+    intOutputs = NULL;
+    feature2D = NULL;
+    intFeature2D = NULL;
+
+    return outputFeatures;
 }/*disc_mRMR_D(int,int,int,double[][],double[],double[])*/
-

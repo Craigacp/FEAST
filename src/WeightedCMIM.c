@@ -54,125 +54,113 @@
 /* MIToolbox includes */
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
-  
-uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures)
-{
-  /*holds the class MI values
-  **the class MI doubles as the partial score from the CMIM paper
-  */
-  double *classMI = (double *)CALLOC_FUNC(noOfFeatures,sizeof(double));
-  /*in the CMIM paper, m = lastUsedFeature*/
-  uint *lastUsedFeature = (uint *)CALLOC_FUNC(noOfFeatures,sizeof(uint));
-  
-  double score, conditionalInfo;
-  int currentFeature;
-  
-  double maxMI = 0.0;
-  int maxMICounter = -1;
-  
-  int j,i;
 
-  uint **feature2D = (uint**) CALLOC_FUNC(noOfFeatures,sizeof(uint*));
+uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures) {
+    /*holds the class MI values
+     **the class MI doubles as the partial score from the CMIM paper
+     */
+    double *classMI = (double *) checkedCalloc(noOfFeatures,sizeof(double));
+    /*in the CMIM paper, m = lastUsedFeature*/
+    uint *lastUsedFeature = (uint *) checkedCalloc(noOfFeatures,sizeof(uint));
 
-  for(j = 0; j < noOfFeatures; j++)
-  {
-    feature2D[j] = featureMatrix + j*noOfSamples;
-  }
-  
-  for (i = 0; i < noOfFeatures;i++)
-  {
-    classMI[i] = calcWeightedMutualInformation(feature2D[i], classColumn, weightVector, noOfSamples);
-    
-    if (classMI[i] > maxMI)
-    {
-      maxMI = classMI[i];
-      maxMICounter = i;
-    }/*if bigger than current maximum*/
-  }/*for noOfFeatures - filling classMI*/
-  
-  outputFeatures[0] = maxMICounter;
-  
-  /*****************************************************************************
-  ** We have populated the classMI array, and selected the highest
-  ** MI feature as the first output feature
-  ** Now we move into the CMIM algorithm
-  *****************************************************************************/
-  
-  for (i = 1; i < k; i++)
-  {
-    score = 0.0;
-    
-    for (j = 0; j < noOfFeatures; j++)
-    {
-      while ((classMI[j] > score) && (lastUsedFeature[j] < i))
-      {
-        /*double calcWeightedConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, double *weightVector, int vectorLength);*/
-        currentFeature = outputFeatures[lastUsedFeature[j]];
-        conditionalInfo = calcWeightedConditionalMutualInformation(feature2D[j],classColumn,feature2D[currentFeature],weightVector,noOfSamples);
-        if (classMI[j] > conditionalInfo)
-        {
-          classMI[j] = conditionalInfo;
-        }/*reset classMI*/
-        /*moved due to C indexing from 0 rather than 1*/
-        lastUsedFeature[j] += 1;
-      }/*while partial score greater than score & not reached last feature*/
-      if (classMI[j] > score)
-      {
-        score = classMI[j];
-        outputFeatures[i] = j;
-      }/*if partial score still greater than score*/
-	}/*for number of features*/
-  }/*for the number of features to select*/
-  
-  FREE_FUNC(classMI);
-  FREE_FUNC(lastUsedFeature);
-  FREE_FUNC(feature2D);
+    double score, conditionalInfo;
+    int currentFeature;
 
-  classMI = NULL;
-  lastUsedFeature = NULL;
-  feature2D = NULL;
+    double maxMI = 0.0;
+    int maxMICounter = -1;
 
-  return outputFeatures;
+    int j, i;
+
+    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+
+    for (j = 0; j < noOfFeatures; j++) {
+        feature2D[j] = featureMatrix + j*noOfSamples;
+    }
+
+    for (i = 0; i < noOfFeatures; i++) {
+        classMI[i] = calcWeightedMutualInformation(feature2D[i],classColumn,weightVector,noOfSamples);
+
+        if (classMI[i] > maxMI) {
+            maxMI = classMI[i];
+            maxMICounter = i;
+        }/*if bigger than current maximum*/
+    }/*for noOfFeatures - filling classMI*/
+
+    outputFeatures[0] = maxMICounter;
+
+    /*****************************************************************************
+     ** We have populated the classMI array, and selected the highest
+     ** MI feature as the first output feature
+     ** Now we move into the CMIM algorithm
+     *****************************************************************************/
+
+    for (i = 1; i < k; i++) {
+        score = 0.0;
+
+        for (j = 0; j < noOfFeatures; j++) {
+            while ((classMI[j] > score) && (lastUsedFeature[j] < i)) {
+                /*double calcWeightedConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, double *weightVector, int vectorLength);*/
+                currentFeature = outputFeatures[lastUsedFeature[j]];
+                conditionalInfo = calcWeightedConditionalMutualInformation(feature2D[j], classColumn, feature2D[currentFeature], weightVector, noOfSamples);
+                if (classMI[j] > conditionalInfo) {
+                    classMI[j] = conditionalInfo;
+                }/*reset classMI*/
+                /*moved due to C indexing from 0 rather than 1*/
+                lastUsedFeature[j] += 1;
+            }/*while partial score greater than score & not reached last feature*/
+            if (classMI[j] > score) {
+                score = classMI[j];
+                outputFeatures[i] = j;
+            }/*if partial score still greater than score*/
+        }/*for number of features*/
+    }/*for the number of features to select*/
+
+    FREE_FUNC(classMI);
+    FREE_FUNC(lastUsedFeature);
+    FREE_FUNC(feature2D);
+
+    classMI = NULL;
+    lastUsedFeature = NULL;
+    feature2D = NULL;
+
+    return outputFeatures;
 }/*weightedCMIM(uint,uint,uint,uint[][],uint[],double[],uint[])*/
 
-double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures)
-{
-  uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
-  uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
-  uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
+double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+    uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
+    uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
+    uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-  double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
-  uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
+    uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
-  int i;
-  
-  for (i = 0; i < noOfFeatures; i++)
-  {
-    feature2D[i] = featureMatrix + i*noOfSamples;
-    intFeature2D[i] = intFeatures + i*noOfSamples;
-    normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
-  }
+    int i;
 
-  normaliseArray(classColumn,intClass,noOfSamples);
+    for (i = 0; i < noOfFeatures; i++) {
+        feature2D[i] = featureMatrix + i*noOfSamples;
+        intFeature2D[i] = intFeatures + i*noOfSamples;
+        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+    }
 
-  weightedCMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
+    normaliseArray(classColumn,intClass,noOfSamples);
 
-  for (i = 0; i < k; i++) {
-      outputFeatures[i] = intOutputs[i];
-  }
+    weightedCMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
 
-  FREE_FUNC(intFeatures);
-  FREE_FUNC(intClass);
-  FREE_FUNC(intOutputs);
-  FREE_FUNC(feature2D);
-  FREE_FUNC(intFeature2D);
+    for (i = 0; i < k; i++) {
+        outputFeatures[i] = intOutputs[i];
+    }
 
-  intFeatures = NULL;
-  intClass = NULL;
-  intOutputs = NULL;
-  feature2D = NULL;
-  intFeature2D = NULL;
+    FREE_FUNC(intFeatures);
+    FREE_FUNC(intClass);
+    FREE_FUNC(intOutputs);
+    FREE_FUNC(feature2D);
+    FREE_FUNC(intFeature2D);
 
-  return outputFeatures;
+    intFeatures = NULL;
+    intClass = NULL;
+    intOutputs = NULL;
+    feature2D = NULL;
+    intFeature2D = NULL;
+
+    return outputFeatures;
 }/*discWeightedCMIM(int,int,int,double[][],double[],double[],double[])*/
-
