@@ -6,6 +6,7 @@
 **
 ** Initial Version - 19/08/2010
 ** Updated - 08/08/2011
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -51,7 +52,7 @@
 #include "MIToolbox/WeightedMutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures) {
+uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint*));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -99,6 +100,7 @@ uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatr
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -137,6 +139,7 @@ uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatr
 
         selectedFeatures[currentHighestFeature] = 1;
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
     }/*for the number of features to select*/
 
@@ -153,9 +156,9 @@ uint *weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatr
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*weightedJMI(uint,uint,uint,uint[][],uint[],double[],uint[])*/
+}/*weightedJMI(uint,uint,uint,uint[][],uint[],double[],uint[],double[])*/
 
-double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -173,7 +176,7 @@ double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *fea
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedJMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
+    weightedJMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -192,4 +195,4 @@ double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *fea
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discWeightedJMI(int,int,int,double[][],double[],double[],double[])*/
+}/*discWeightedJMI(int,int,int,double[][],double[],double[],double[],double[])*/

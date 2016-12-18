@@ -8,9 +8,10 @@
 **
 ** Initial Version - 13/06/2008
 ** Updated - 23/06/2011 - Patched first feature selection error.
-** Updated - 22/02/2014 - Moved feature index increment to mex code.
-** Updated - 22/02/2014 - Patched calloc.
-** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           22/02/2014 - Moved feature index increment to mex code.
+**           22/02/2014 - Patched calloc.
+**           12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -22,7 +23,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -57,7 +58,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures) {
+uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     /*holds the class MI values
      **the class MI doubles as the partial score from the CMIM paper
      */
@@ -90,6 +91,7 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
     }/*for noOfFeatures - filling classMI*/
 
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -113,6 +115,7 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
             }/*while partial score greater than score & not reached last feature*/
             if (classMI[j] > score) {
                 score = classMI[j];
+                featureScores[i] = score;
                 outputFeatures[i] = j;
             }/*if partial score still greater than score*/
         }/*for number of features*/
@@ -127,9 +130,9 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
     feature2D = NULL;
 
     return outputFeatures;
-}/*CMIM(uint,uint,uint,uint[][],uint[],uint[])*/
+}/*CMIM(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -147,7 +150,7 @@ double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    CMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    CMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -166,4 +169,4 @@ double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discCMIM(int,int,int,double[][],double[],double[])*/
+}/*discCMIM(int,int,int,double[][],double[],double[],featureScores)*/

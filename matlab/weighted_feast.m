@@ -1,7 +1,7 @@
-function [selectedFeatures] = weighted_feast(criteria,numToSelect,weights,data,labels,varargin)
-%function [selectedFeatures] = weighted_feast(criteria,numToSelect,weights,data,labels,varargin)
+function [selectedFeatures, featureScores] = weighted_feast(criteria,numToSelect,weights,data,labels,varargin)
+%function [selectedFeatures, featureScores] = weighted_feast(criteria,numToSelect,weights,data,labels,varargin)
 %
-%Provides access to the feature selection algorithms in FSToolboxMex
+%Provides access to the weighted feature selection algorithms in WeightedFSToolboxMex
 %
 %Expects the features to be columns of the data matrix, and
 %requires that both the features and labels are integers.
@@ -12,21 +12,13 @@ function [selectedFeatures] = weighted_feast(criteria,numToSelect,weights,data,l
 % where algName is:
 %  mim, cmim, jmi, disr
 %
-% The license is in the license.txt provided.
-
+% FEAST is BSD-licensed, see the LICENSE file.
 
 %Internal FSToolbox Criteria to number mapping
-%MIFS      = 1
-%mRMR      = 2
 %CMIM      = 3
 %JMI       = 4 
 %DISR      = 5 
-%CIFE      = 6 
-%ICAP      = 7 
-%CondRed   = 8 
-%BetaGamma = 9 
 %CMI       = 10
-%
 
 if ((numToSelect < 1) || (numToSelect > size(data,2)))
     error(['You have requested ' num2str(numToSelect) ' features, which is not possible']);
@@ -43,15 +35,15 @@ if ((finiteDataCount ~= totalData) || (finiteLabelsCount ~= totalLabels))
 end
 
 if (strcmpi(criteria,'mim'))
-    selectedFeatures = WMIM(numToSelect,weights,data,labels);
+    [selectedFeatures, featureScores] = WMIM(numToSelect,weights,data,labels);
 elseif (strcmpi(criteria,'cmim'))
-    selectedFeatures = WeightedFSToolboxMex(3,numToSelect,weights,data,labels);
+    [selectedFeatures, featureScores] = WeightedFSToolboxMex(3,numToSelect,weights,data,labels);
 elseif (strcmpi(criteria,'jmi'))
-    selectedFeatures = WeightedFSToolboxMex(4,numToSelect,weights,data,labels);
+    [selectedFeatures, featureScores] = WeightedFSToolboxMex(4,numToSelect,weights,data,labels);
 elseif (strcmpi(criteria,'disr'))
-    selectedFeatures = WeightedFSToolboxMex(5,numToSelect,weights,data,labels);
+    [selectedFeatures, featureScores] = WeightedFSToolboxMex(5,numToSelect,weights,data,labels);
 elseif (strcmpi(criteria,'cmi'))
-    selectedFeatures = WeightedFSToolboxMex(10,numToSelect,weights,data,labels);
+    [selectedFeatures, featureScores] = WeightedFSToolboxMex(10,numToSelect,weights,data,labels);
 else
     selectedFeatures = [];
     disp(['Unrecognised criteria ' criteria]);

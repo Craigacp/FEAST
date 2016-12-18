@@ -10,6 +10,7 @@
 **
 ** Initial Version - 13/06/2008
 ** Updated - 08/08/2011
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -55,7 +56,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures) {
+uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
     /*holds the class MI values
      **the class MI doubles as the partial score from the CMIM paper
      */
@@ -87,6 +88,7 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
     }/*for noOfFeatures - filling classMI*/
 
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -110,6 +112,7 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
             }/*while partial score greater than score & not reached last feature*/
             if (classMI[j] > score) {
                 score = classMI[j];
+                featureScores[i] = score;
                 outputFeatures[i] = j;
             }/*if partial score still greater than score*/
         }/*for number of features*/
@@ -124,9 +127,9 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
     feature2D = NULL;
 
     return outputFeatures;
-}/*weightedCMIM(uint,uint,uint,uint[][],uint[],double[],uint[])*/
+}/*weightedCMIM(uint,uint,uint,uint[][],uint[],double[],uint[],double[])*/
 
-double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -144,7 +147,7 @@ double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *fe
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedCMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
+    weightedCMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -163,4 +166,4 @@ double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *fe
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discWeightedCMIM(int,int,int,double[][],double[],double[],double[])*/
+}/*discWeightedCMIM(int,int,int,double[][],double[],double[],double[],double[])*/

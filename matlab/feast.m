@@ -1,5 +1,5 @@
-function [selectedFeatures] = feast(criteria,numToSelect,data,labels,varargin)
-%function [selectedFeatures] = feast(criteria,numToSelect,data,labels,varargin)
+function [selectedFeatures, featureScores] = feast(criteria,numToSelect,data,labels,varargin)
+%function [selectedFeatures, featureScores] = feast(criteria,numToSelect,data,labels,varargin)
 %
 %Provides access to the feature selection algorithms in FSToolboxMex
 %
@@ -23,7 +23,7 @@ function [selectedFeatures] = feast(criteria,numToSelect,data,labels,varargin)
 % where algName is:
 % fcbf (note this ignores the numToSelect)
 %
-% The license is in the license.txt provided.
+% FEAST is BSD-licensed, see the LICENSE file.
 
 
 %Internal FSToolbox Criteria to number mapping
@@ -58,28 +58,28 @@ if ((finiteDataCount ~= totalData) || (finiteLabelsCount ~= totalLabels))
 end
 
 if (strcmpi(criteria,'mim'))
-    selectedFeatures = MIM(numToSelect,data,labels);
+    [selectedFeatures, featureScores] = MIM(numToSelect,data,labels);
 elseif (strcmpi(criteria,'mifs'))
     if (nargin == 4)
         beta = 1;
     else
         beta = varargin{1};
     end
-    selectedFeatures = FSToolboxMex(1,numToSelect,data,labels,beta);
+    [selectedFeatures, featureScores] = FSToolboxMex(1,numToSelect,data,labels,beta);
 elseif (strcmpi(criteria,'mrmr'))
-    selectedFeatures = FSToolboxMex(2,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(2,numToSelect,data,labels);
 elseif (strcmpi(criteria,'cmim'))
-    selectedFeatures = FSToolboxMex(3,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(3,numToSelect,data,labels);
 elseif (strcmpi(criteria,'jmi'))
-    selectedFeatures = FSToolboxMex(4,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(4,numToSelect,data,labels);
 elseif (strcmpi(criteria,'disr'))
-    selectedFeatures = FSToolboxMex(5,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(5,numToSelect,data,labels);
 elseif ((strcmpi(criteria,'cife')) || (strcmpi(criteria,'fou')))
-    selectedFeatures = FSToolboxMex(6,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(6,numToSelect,data,labels);
 elseif (strcmpi(criteria,'icap'))
-    selectedFeatures = FSToolboxMex(7,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(7,numToSelect,data,labels);
 elseif (strcmpi(criteria,'condred'))
-    selectedFeatures = FSToolboxMex(8,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(8,numToSelect,data,labels);
 elseif (strcmpi(criteria,'betagamma'))
     if (nargin ~= 6)
         error('BetaGamma criteria expects a beta and a gamma');
@@ -87,9 +87,9 @@ elseif (strcmpi(criteria,'betagamma'))
         beta = varargin{1};
         gamma = varargin{2};
     end
-    selectedFeatures = FSToolboxMex(9,numToSelect,data,labels,beta,gamma);
+    [selectedFeatures, featureScores] = FSToolboxMex(9,numToSelect,data,labels,beta,gamma);
 elseif (strcmpi(criteria,'cmi'))
-    selectedFeatures = FSToolboxMex(10,numToSelect,data,labels);
+    [selectedFeatures, featureScores] = FSToolboxMex(10,numToSelect,data,labels);
 elseif (strcmpi(criteria,'fcbf'))
     if (nargin == 4)
         error('Threshold for FCBF not supplied');

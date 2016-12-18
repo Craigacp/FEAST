@@ -4,7 +4,8 @@
 **
 ** Initial Version - 22/02/2014
 ** Updated - 22/02/2014 - Patched calloc.
-** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -16,7 +17,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -51,7 +52,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures) {
+uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -88,6 +89,7 @@ uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /**
      * Ideally this should use a quick sort, but it's still quicker than
@@ -105,6 +107,7 @@ uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
         }
         selectedFeatures[maxMICounter] = 1;
         outputFeatures[i] = maxMICounter;
+        featureScores[i] = maxMI;
     }/*for the number of features to select*/
 
     FREE_FUNC(classMI);
@@ -116,9 +119,9 @@ uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*MIM(uint,uint,uint,uint[][],uint[],uint[])*/
+}/*MIM(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -136,7 +139,7 @@ double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    MIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    MIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -155,4 +158,4 @@ double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discMIM(int,int,int,double[][],double[],double[])*/
+}/*discMIM(int,int,int,double[][],double[],double[],double[])*/

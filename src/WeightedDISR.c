@@ -9,6 +9,7 @@
 ** 
 ** Initial Version - 13/06/2008
 ** Updated - 08/08/2011
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -54,7 +55,7 @@
 #include "MIToolbox/WeightedEntropy.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures) {
+uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
     uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -101,6 +102,7 @@ uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -144,6 +146,7 @@ uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
 
         selectedFeatures[currentHighestFeature] = 1;
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
     }/*for the number of features to select*/
 
@@ -160,9 +163,9 @@ uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*weightedDISR(uint,uint,uint,uint[][],uint[],double[],uint[])*/
+}/*weightedDISR(uint,uint,uint,uint[][],uint[],double[],uint[],double[])*/
 
-double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -180,7 +183,7 @@ double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *fe
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedDISR(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs);
+    weightedDISR(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -199,4 +202,4 @@ double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *fe
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discWeightedDISR(int,int,int,double[][],double[],double[],double[])*/
+}/*discWeightedDISR(int,int,int,double[][],double[],double[],double[],double[])*/

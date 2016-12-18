@@ -1,13 +1,12 @@
 /*******************************************************************************
 ** WeightedFSAlgorithms.h
-** Provides the function definitions for the list of algorithms implemented
-** in the FSToolbox.
+** Provides the function definitions for the list of weighted feature selection
+** algorithms implemented in FEAST.
 **
 ** Author: Adam Pocock
-** Created: 27/06/2011
-**
-** Copyright 2010/2011 Adam Pocock, The University Of Manchester
-** www.cs.manchester.ac.uk
+** Created - 27/06/2011
+** Updated - 14/09/2016 - Added double and uint entry points for all functions.
+**           18/12/2016 - Added an output variable for the feature scores.
 **
 ** Part of the FEAture Selection Toolbox (FEAST), please reference
 ** "Information Theoretic Feature Selection for Cost-Sensitive Problems"
@@ -48,8 +47,8 @@
  * All algorithms take an integer k which determines how many features to 
  * select, the number of samples and the number of features. Additionally each
  * algorithm takes pointers to the data matrix, the label vector, the weight
- * vector and a pointer to the output vector. The output vector should be 
- * pre-allocated with sizeof(double)*k bytes.
+ * vector, the output vector and the featureScores vector. The output and 
+ * featureScores vector should be pre-allocated with sizeof(double)*k bytes.
  *
  * FSToolbox expects all matrices to be in column-major (Fortan style) format.
  *
@@ -78,8 +77,8 @@
 ** "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
 ** F. Fleuret, JMLR (2004)
 *******************************************************************************/
-uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
-double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores);
+double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** WeightedJMI() implements the JMI criterion from
@@ -87,8 +86,8 @@ double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *fe
 ** "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
 ** H. Yang and J. Moody, NIPS (1999)
 *******************************************************************************/
-uint* weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
-double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores);
+double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** weightedDISR() implements the Double Input Symmetrical Relevance criterion
@@ -97,8 +96,8 @@ double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double *fea
 ** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
 ** P. Meyer and G. Bontempi, (2006)
 *******************************************************************************/
-uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures);
-double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+uint* weightedDISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores);
+double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** weightedCondMI() implements the CMI criterion using a greedy forward search
@@ -106,7 +105,7 @@ double* discWeightedDISR(uint k, uint noOfSamples, uint noOfFeatures, double *fe
 ** It returns an int array, not a uint array, as -1 is a sentinel value signifying
 ** there was not enough information to select a feature.
 *******************************************************************************/
-int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures);
-double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures);
+int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures, double *featureScores);
+double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
 
 #endif

@@ -14,7 +14,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2011, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -48,167 +48,173 @@
 #include "MIToolbox/Entropy.h"
 
 /******************************************************************************
-** entry point for the mex call
-** nlhs - number of outputs
-** plhs - pointer to array of outputs
-** nrhs - number of inputs
-** prhs - pointer to array of inputs
-******************************************************************************/
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
-  /*************************************************************
-  ** this function takes 5 arguments:
-  ** flag = which algorithm to use,
-  ** k = number of features to select,
-  ** weightVector[] = vector of example weights
-  ** featureMatrix[][] = matrix of features,
-  ** classColumn[] = targets,
-  ** the arguments apart from weightVector should 
-  ** be discrete integers, with the weightVector being positive
-  ** real numbers,
-  ** and has one output:
-  ** selectedFeatures[] of size k
-  *************************************************************/
-  
-  int flag, k; 
-  double optionalParam1, optionalParam2;
-  int numberOfFeatures, numberOfSamples, numberOfWeights, numberOfTargets;
-  double *featureMatrix, *targets, *weightVector, *output, *outputFeatures;
+ ** entry point for the mex call
+ ** nlhs - number of outputs
+ ** plhs - pointer to array of outputs
+ ** nrhs - number of inputs
+ ** prhs - pointer to array of inputs
+ ******************************************************************************/
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    /*************************************************************
+     ** this function takes 5 arguments:
+     ** flag = which algorithm to use,
+     ** k = number of features to select,
+     ** weightVector[] = vector of example weights
+     ** featureMatrix[][] = matrix of features,
+     ** classColumn[] = targets,
+     ** the arguments apart from weightVector should 
+     ** be discrete integers, with the weightVector being positive
+     ** real numbers,
+     ** and has one output:
+     ** selectedFeatures[] of size k
+     *************************************************************/
 
-  double entropyTest;
-  int i,j;
+    int flag, k;
+    double optionalParam1, optionalParam2;
+    int numberOfFeatures, numberOfSamples, numberOfWeights, numberOfTargets;
+    double *featureMatrix, *targets, *weightVector, *output, *outputFeatures, *scores;
 
-  /************************************************************
-  ** number to function map
-  ** 1 = Not implemented, was MIFS
-  ** 2 = Not implemented, was mRMR
-  ** 3 = CMIM
-  ** 4 = JMI
-  ** 5 = DISR
-  ** 6 = Not implemented, was CIFE
-  ** 7 = Not implemented, was ICAP
-  ** 8 = Not implemented, was CondRed
-  ** 9 = Not implemented, was BetaGamma
-  ** 10 = CMI
-  *************************************************************/
-  if (nlhs > 1)
-  {
-    printf("Incorrect number of output arguments");
-  }/*if not 1 output*/
-  if (nrhs != 5) /*((nrhs < 4) || (nrhs > 6))*/
-  {
-    printf("Incorrect number of input arguments");
-    return;
-  }/*if not 4-6 inputs*/
- 
-  /*get the flag for which algorithm*/
-  flag = (int) mxGetScalar(prhs[0]);
+    double entropyTest;
+    int i, j;
 
-  /*get the number of features to select, cast out as it is a double*/
-  k = (int) mxGetScalar(prhs[1]);
-
-  numberOfWeights = mxGetN(prhs[2]);
-
-  numberOfFeatures = mxGetN(prhs[3]);
-  numberOfSamples = mxGetM(prhs[3]);
-  
-  numberOfTargets = mxGetM(prhs[4]);
-  
-  if (numberOfTargets != numberOfSamples)
-  {
-    printf("Number of targets must match number of samples\n");
-    printf("Number of targets = %d, Number of Samples = %d, Number of Features = %d\n",numberOfTargets,numberOfSamples,numberOfFeatures);
-    
-    plhs[0] = mxCreateDoubleMatrix(0,0,mxREAL);
-    return;
-  }/*if size mismatch*/
-  else if ((k < 1) || (k > numberOfFeatures))
-  {
-      printf("You have requested k = %d features, which is not possible\n",k);
-      plhs[0] = mxCreateDoubleMatrix(0,0,mxREAL);
-      return;
-  }
-  else
-  {
-    weightVector = mxGetPr(prhs[2]);
-    featureMatrix = mxGetPr(prhs[3]);
-    targets = mxGetPr(prhs[4]);
-        
-    /*double calculateEntropy(double *dataVector, int vectorLength)*/
-    entropyTest = discAndCalcEntropy(targets,numberOfSamples);
-    if (entropyTest < 0.0000001)
-    {
-      printf("The class label Y has entropy of 0, therefore all mutual informations containing Y will be 0. No feature selection is performed\n");
-      plhs[0] = mxCreateDoubleMatrix(0,0,mxREAL);
-      return;
-    }
-    else
-    { 
-        /*printf("Flag = %d, k = %d, numFeatures = %d, numSamples = %d\n",flag,k,numberOfFeatures,numberOfSamples);*/
-        switch (flag)
-        {
-            case 3: /* CMIM */
-            {
-                plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
-                output = (double *)mxGetPr(plhs[0]);
-                
-                discWeightedCMIM(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
-
-                incrementVector(output,k);
-                break;
-            }
-            case 4: /* JMI */
-            {
-                plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
-                output = (double *)mxGetPr(plhs[0]);
-               
-                discWeightedJMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
-
-                incrementVector(output,k);
-                break;
-            }
-            case 5: /* DISR */
-            {
-                plhs[0] = mxCreateDoubleMatrix(k,1,mxREAL);
-                output = (double *)mxGetPr(plhs[0]);
-
-                discWeightedDISR(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
-
-                incrementVector(output,k);
-                break;
-            }
-            case 10: /* CMI */
-            {
-                output = (double *)mxCalloc(k,sizeof(double));
-
-                discWeightedCondMI(k,numberOfSamples,numberOfFeatures,featureMatrix,targets,weightVector,output);
-
-                i = 0;
-
-                while((output[i] != -1) && (i < k))
-                {
-                    i++;
-                }
-
-                plhs[0] = mxCreateDoubleMatrix(i,1,mxREAL);
-                outputFeatures = (double *)mxGetPr(plhs[0]);
-
-                for (j = 0; j < i; j++)
-                {
-                    outputFeatures[j] = output[j] + 1; /*C indexes from 0 not 1*/
-                }/*for number of selected features*/
-
-                mxFree(output);
-                output = NULL;
-                break;
-            }
-            default:
-            {
-                printf("Unsupported operation. %d is an unknown flag.\n",flag);
-                break;
-            }
-        }/*switch on flag*/
+    /************************************************************
+     ** number to function map
+     ** 1 = Not implemented, was MIFS
+     ** 2 = Not implemented, was mRMR
+     ** 3 = CMIM
+     ** 4 = JMI
+     ** 5 = DISR
+     ** 6 = Not implemented, was CIFE
+     ** 7 = Not implemented, was ICAP
+     ** 8 = Not implemented, was CondRed
+     ** 9 = Not implemented, was BetaGamma
+     ** 10 = CMI
+     *************************************************************/
+    if ((nlhs != 1) && (nlhs != 2)) {
+        printf("Incorrect number of output arguments\n");
         return;
+    }/*if not 1 output*/
+    if (nrhs != 5) {
+        printf("Incorrect number of input arguments\n");
+        return;
+    }/*if not 5 inputs*/
+
+    /*get the flag for which algorithm*/
+    flag = (int) mxGetScalar(prhs[0]);
+
+    /*get the number of features to select, cast out as it is a double*/
+    k = (int) mxGetScalar(prhs[1]);
+
+    numberOfWeights = mxGetN(prhs[2]);
+
+    numberOfFeatures = mxGetN(prhs[3]);
+    numberOfSamples = mxGetM(prhs[3]);
+
+    numberOfTargets = mxGetM(prhs[4]);
+
+    if (numberOfTargets != numberOfSamples) {
+        printf("Number of targets must match number of samples\n");
+        printf("Number of targets = %d, Number of Samples = %d, Number of Features = %d\n", numberOfTargets, numberOfSamples, numberOfFeatures);
+
+        plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+        if (nlhs == 2) {
+            plhs[1] = mxCreateDoubleMatrix(0, 0, mxREAL);
+        }
+        return;
+    }/*if size mismatch*/
+    else if ((k < 1) || (k > numberOfFeatures)) {
+        printf("You have requested k = %d features, which is not possible\n", k);
+        plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+        if (nlhs == 2) {
+            plhs[1] = mxCreateDoubleMatrix(0, 0, mxREAL);
+        }
+        return;
+    } else {
+        weightVector = mxGetPr(prhs[2]);
+        featureMatrix = mxGetPr(prhs[3]);
+        targets = mxGetPr(prhs[4]);
+
+        /*double calculateEntropy(double *dataVector, int vectorLength)*/
+        entropyTest = discAndCalcEntropy(targets, numberOfSamples);
+        if (entropyTest < 0.0000001) {
+            printf("The class label Y has entropy of 0, therefore all mutual informations containing Y will be 0. No feature selection is performed\n");
+            plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+            if (nlhs == 2) {
+                plhs[1] = mxCreateDoubleMatrix(0, 0, mxREAL);
+            }
+            return;
+        } else {
+            if (nlhs == 2) {
+                plhs[1] = mxCreateDoubleMatrix(k, 1, mxREAL);
+                scores = mxGetPr(plhs[1]);
+            } else {
+                scores = (double *) mxCalloc(k, sizeof(double));
+            }
+            /*printf("Flag = %d, k = %d, numFeatures = %d, numSamples = %d\n",flag,k,numberOfFeatures,numberOfSamples);*/
+            switch (flag) {
+                case 3: /* CMIM */
+                {
+                    plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
+                    output = (double *) mxGetPr(plhs[0]);
+
+                    discWeightedCMIM(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+
+                    incrementVector(output, k);
+                    break;
+                }
+                case 4: /* JMI */
+                {
+                    plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
+                    output = (double *) mxGetPr(plhs[0]);
+
+                    discWeightedJMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+
+                    incrementVector(output, k);
+                    break;
+                }
+                case 5: /* DISR */
+                {
+                    plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
+                    output = (double *) mxGetPr(plhs[0]);
+
+                    discWeightedDISR(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+
+                    incrementVector(output, k);
+                    break;
+                }
+                case 10: /* CMI */
+                {
+                    output = (double *) mxCalloc(k, sizeof(double));
+
+                    discWeightedCondMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+
+                    i = 0;
+
+                    while ((output[i] != -1) && (i < k)) {
+                        i++;
+                    }
+
+                    plhs[0] = mxCreateDoubleMatrix(i, 1, mxREAL);
+                    outputFeatures = (double *) mxGetPr(plhs[0]);
+
+                    for (j = 0; j < i; j++) {
+                        outputFeatures[j] = output[j] + 1; /*C indexes from 0 not 1*/
+                    }/*for number of selected features*/
+
+                    mxFree(output);
+                    output = NULL;
+                    break;
+                }
+                default:
+                {
+                    printf("Unsupported operation. %d is an unknown flag.\n", flag);
+                    break;
+                }
+            }/*switch on flag*/
+            if (nlhs == 1) {
+                mxFree(scores);
+            }
+            return;
+        }
     }
-  }
 }/*mex function entry*/

@@ -3,8 +3,9 @@
 **
 ** Initial Version - 19/08/2010
 ** Updated - 23/06/2011
-** Updated - 22/02/2014 - Patched calloc.
-** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           22/02/2014 - Patched calloc.
+**           12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -16,7 +17,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2013, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -54,7 +55,7 @@
 #include "MIToolbox/MutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures) {
+int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures, double *featureScores) {
     uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -94,6 +95,7 @@ int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, ui
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     memcpy(conditionVector, feature2D[maxMICounter],sizeof(int)*noOfSamples);
 
@@ -124,6 +126,7 @@ int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, ui
         }/*for number of features*/
 
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
         if (currentHighestFeature != -1) {
             selectedFeatures[currentHighestFeature] = 1;
@@ -142,9 +145,9 @@ int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, ui
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*CondMI(uint,uint,uint,uint[][],uint[],int[])*/
+}/*CondMI(uint,uint,uint,uint[][],uint[],int[],double[])*/
 
-double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     int *intOutputs = (int *) checkedCalloc(k,sizeof(int));
@@ -162,7 +165,7 @@ double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureM
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    CondMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    CondMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -181,4 +184,4 @@ double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureM
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discCondMI(int,int,int,double[][],double[],double[])*/
+}/*discCondMI(int,int,int,double[][],double[],double[],double[])*/

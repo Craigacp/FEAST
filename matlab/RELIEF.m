@@ -1,12 +1,10 @@
+function [w bestidx] = RELIEF(data, labels, T)
+% function w = RELIEF(data, labels, T) 
 % RELIEF - Kira & Rendell 1992
 % T is number of patterns to use
 % Defaults to all patterns if not specified.
 %
-% The license is in the license.txt provided.
-%
-% function w = RELIEF( data, labels, T ) 
-%
-function [w bestidx] = RELIEF ( data, labels, T )
+% The license is in the LICENSE file.
 
 if ~exist('T','var')
     T=size(data,1);

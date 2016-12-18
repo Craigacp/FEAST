@@ -6,7 +6,7 @@ function [selectedFeatures] = FCBF(featureMatrix,classColumn,threshold)
 %Instead of selecting a fixed number of features it provides a relevancy threshold and selects all
 %features which score above that and are not redundant
 %
-% The license is in the license.txt provided.
+% The license is in the LICENSE file.
 
 numFeatures = size(featureMatrix,2);
 classScore = zeros(numFeatures,1);

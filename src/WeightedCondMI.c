@@ -4,6 +4,7 @@
 **
 ** Initial Version - 19/08/2010
 ** Updated - 08/08/2011
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -52,7 +53,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures) {
+int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures, double *featureScores) {
     uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -92,6 +93,7 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     memcpy(conditionVector,feature2D[maxMICounter],sizeof(int)*noOfSamples);
 
@@ -122,6 +124,7 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
         }/*for number of features*/
 
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
         if (currentHighestFeature != -1) {
             selectedFeatures[currentHighestFeature] = 1;
@@ -141,9 +144,9 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*weightedCondMI(uint,uint,uint,uint[][],uint[],double[],int[])*/
+}/*weightedCondMI(uint,uint,uint,uint[][],uint[],double[],int[],double[])*/
 
-double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures) {
+double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     int *intOutputs = (int *) checkedCalloc(k,sizeof(int));
@@ -161,7 +164,7 @@ double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedCondMI(k,noOfSamples,noOfFeatures,intFeatures,intClass,weightVector,intOutputs);
+    weightedCondMI(k,noOfSamples,noOfFeatures,intFeatures,intClass,weightVector,intOutputs,featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -180,4 +183,4 @@ double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discWeightedCondMI(int,int,int,double[][],double[],double[],double[])*/
+}/*discWeightedCondMI(int,int,int,double[][],double[],double[],double[],double[])*/

@@ -3,7 +3,7 @@ function [selectedFeatures scoreVector] = MIM(k, weights, data, labels)
 %
 %Mutual information Maximisation
 %
-% The license is in the license.txt provided.
+% The license is in the LICENSE file.
 
 numf = size(data,2);
 classMI = zeros(numf,1);
@@ -15,3 +15,5 @@ end
 [scoreVector index] = sort(classMI,'descend');
 
 selectedFeatures = index(1:k);
+scoreVector = scoreVector(1:k);
+

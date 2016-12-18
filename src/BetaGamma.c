@@ -1,6 +1,6 @@
 /*******************************************************************************
 ** betaGamma() implements the Beta-Gamma space from Brown (2009).
-** This incoporates MIFS, CIFE, and CondRed.
+** This incorporates MIFS, CIFE, and CondRed.
 **
 ** MIFS - "Using mutual information for selecting features in supervised neural net learning"
 ** R. Battiti, IEEE Transactions on Neural Networks, 1994
@@ -8,13 +8,14 @@
 ** CIFE - "Conditional Infomax Learning: An Integrated Framework for Feature Extraction and Fusion"
 ** D. Lin and X. Tang, European Conference on Computer Vision (2006)
 **
-** The Beta Gamma space is explained in Brown (2009) and Brown et al. (2011) 
+** The Beta Gamma space is explained in Brown (2009) and Brown et al. (2012) 
 **
 ** Initial Version - 13/06/2008
 ** Updated - 12/02/2013 - patched the use of DBL_MAX
-** Updated - 22/02/2014 - Moved feature index increment to mex code.
-** Updated - 22/02/2014 - Patched calloc.
-** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           22/02/2014 - Moved feature index increment to mex code.
+**           22/02/2014 - Patched calloc.
+**           12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -26,7 +27,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -61,7 +62,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double betaParam, double gammaParam) {
+uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores, double betaParam, double gammaParam) {
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -121,6 +122,7 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /*************
      ** Now we have populated the classMI array, and selected the highest
@@ -169,6 +171,7 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
 
         selectedFeatures[currentHighestFeature] = 1;
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
     }/*for the number of features to select*/
 
@@ -183,9 +186,9 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*BetaGamma(uint,uint,uint,uint[][],uint[],uint[],double,double)*/
+}/*BetaGamma(uint,uint,uint,uint[][],uint[],uint[],double[],double,double)*/
 
-double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double beta, double gamma) {
+double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -203,7 +206,7 @@ double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featu
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    BetaGamma(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, beta, gamma);
+    BetaGamma(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores, beta, gamma);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -222,4 +225,4 @@ double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featu
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discBetaGamma(int,int,int,double[][],double[],double[],beta,gamma)*/
+}/*discBetaGamma(uint,uint,uint,double[][],double[],double[],double[],beta,gamma)*/

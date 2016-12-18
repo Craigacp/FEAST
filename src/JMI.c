@@ -6,9 +6,10 @@
 **
 ** Initial Version - 19/08/2010
 ** Updated - 23/06/2011
-** Updated - 22/02/2014 - Moved feature index increment to mex code.
-** Updated - 22/02/2014 - Patched calloc.
-** Updated - 12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           22/02/2014 - Moved feature index increment to mex code.
+**           22/02/2014 - Patched calloc.
+**           12/03/2016 - Changed initial value of maxMI to -1.0 to prevent segfaults when I(X;Y) = 0.0 for all X.
+**           17/12/2016 - Added feature scores.
 **
 ** Author - Adam Pocock
 ** 
@@ -20,7 +21,7 @@
 **
 ** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
 ** 
-** Copyright (c) 2010-2014, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,
@@ -55,7 +56,7 @@
 #include "MIToolbox/MutualInformation.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures) {
+uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
@@ -102,6 +103,7 @@ uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
 
     selectedFeatures[maxMICounter] = 1;
     outputFeatures[0] = maxMICounter;
+    featureScores[0] = maxMI;
 
     /***************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -140,6 +142,7 @@ uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
 
         selectedFeatures[currentHighestFeature] = 1;
         outputFeatures[i] = currentHighestFeature;
+        featureScores[i] = score;
 
     }/*for the number of features to select*/
 
@@ -156,9 +159,9 @@ uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint
     selectedFeatures = NULL;
 
     return outputFeatures;
-}/*JMI(uint,uint,uint,uint[][],uint[],uint[])*/
+}/*JMI(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures) {
+double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
@@ -176,7 +179,7 @@ double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    JMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs);
+    JMI(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -195,4 +198,4 @@ double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
     intFeature2D = NULL;
 
     return outputFeatures;
-}/*discJMI(int,int,int,double[][],double[],double[])*/
+}/*discJMI(int,int,int,double[][],double[],double[],double[])*/
