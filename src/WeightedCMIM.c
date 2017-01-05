@@ -56,7 +56,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
+uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
     /*holds the class MI values
      **the class MI doubles as the partial score from the CMIM paper
      */
@@ -72,14 +72,8 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
 
     int j, i;
 
-    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
-
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j*noOfSamples;
-    }
-
     for (i = 0; i < noOfFeatures; i++) {
-        classMI[i] = calcWeightedMutualInformation(feature2D[i],classColumn,weightVector,noOfSamples);
+        classMI[i] = calcWeightedMutualInformation(featureMatrix[i],classColumn,weightVector,noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -103,7 +97,7 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
             while ((classMI[j] > score) && (lastUsedFeature[j] < i)) {
                 /*double calcWeightedConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, double *weightVector, int vectorLength);*/
                 currentFeature = outputFeatures[lastUsedFeature[j]];
-                conditionalInfo = calcWeightedConditionalMutualInformation(feature2D[j], classColumn, feature2D[currentFeature], weightVector, noOfSamples);
+                conditionalInfo = calcWeightedConditionalMutualInformation(featureMatrix[j], classColumn, featureMatrix[currentFeature], weightVector, noOfSamples);
                 if (classMI[j] > conditionalInfo) {
                     classMI[j] = conditionalInfo;
                 }/*reset classMI*/
@@ -120,34 +114,30 @@ uint* weightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMat
 
     FREE_FUNC(classMI);
     FREE_FUNC(lastUsedFeature);
-    FREE_FUNC(feature2D);
 
     classMI = NULL;
     lastUsedFeature = NULL;
-    feature2D = NULL;
 
     return outputFeatures;
 }/*weightedCMIM(uint,uint,uint,uint[][],uint[],double[],uint[],double[])*/
 
-double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
+double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedCMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, weightVector, intOutputs, featureScores);
+    weightedCMIM(k, noOfSamples, noOfFeatures, intFeature2D, intClass, weightVector, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -156,13 +146,11 @@ double* discWeightedCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *fe
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;

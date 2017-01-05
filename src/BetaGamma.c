@@ -62,8 +62,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores, double betaParam, double gammaParam) {
-    uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
+uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores, double betaParam, double gammaParam) {
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
     /*holds the class MI values*/
@@ -82,26 +81,6 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
 
     int i, j, m;
 
-    /***********************************************************
-     ** because the array is passed as
-     **  s a m p l e s
-     ** f
-     ** e
-     ** a
-     ** t
-     ** u
-     ** r
-     ** e
-     ** s
-     ** 
-     ** this pulls out a pointer to the first sample of
-     ** each feature and stores it as a multidimensional array
-     ** so it can be indexed nicely
-     ***********************************************************/
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j*noOfSamples;
-    }
-
     for (i = 0; i < sizeOfMatrix; i++) {
         featureMIMatrix[i] = -1;
     }/*for featureMIMatrix - blank to -1*/
@@ -112,7 +91,7 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
      ***********************************************************/
 
     for (i = 0; i < noOfFeatures; i++) {
-        classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
+        classMI[i] = calcMutualInformation(featureMatrix[i], classColumn, noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -151,10 +130,10 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
                     arrayPosition = m * noOfFeatures + j;
                     if (featureMIMatrix[arrayPosition] == -1) {
                         /*double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);*/
-                        featureMIMatrix[arrayPosition] = betaParam * calcMutualInformation(feature2D[outputFeatures[m]], feature2D[j], noOfSamples);
+                        featureMIMatrix[arrayPosition] = betaParam * calcMutualInformation(featureMatrix[outputFeatures[m]], featureMatrix[j], noOfSamples);
 
                         /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
-                        featureMIMatrix[arrayPosition] -= gammaParam * calcConditionalMutualInformation(feature2D[outputFeatures[m]], feature2D[j], classColumn, noOfSamples);
+                        featureMIMatrix[arrayPosition] -= gammaParam * calcConditionalMutualInformation(featureMatrix[outputFeatures[m]], featureMatrix[j], classColumn, noOfSamples);
                     }/*if not already known*/
 
                     totalFeatureMI += featureMIMatrix[arrayPosition];
@@ -176,37 +155,33 @@ uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix
     }/*for the number of features to select*/
 
     FREE_FUNC(classMI);
-    FREE_FUNC(feature2D);
     FREE_FUNC(featureMIMatrix);
     FREE_FUNC(selectedFeatures);
 
     classMI = NULL;
-    feature2D = NULL;
     featureMIMatrix = NULL;
     selectedFeatures = NULL;
 
     return outputFeatures;
 }/*BetaGamma(uint,uint,uint,uint[][],uint[],uint[],double[],double,double)*/
 
-double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma) {
+double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    BetaGamma(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores, beta, gamma);
+    BetaGamma(k, noOfSamples, noOfFeatures, intFeature2D, intClass, intOutputs, featureScores, beta, gamma);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -215,13 +190,11 @@ double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featu
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;

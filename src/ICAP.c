@@ -56,8 +56,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
-    uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
+uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
     /*holds the class MI values*/
@@ -76,10 +75,6 @@ uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
 
     int i, j, m;
 
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j * noOfSamples;
-    }
-
     for (i = 0; i < sizeOfMatrix; i++) {
         featureInteractionMatrix[i] = -1;
     }/*for featureInteractionMatrix - blank to -1*/
@@ -88,7 +83,7 @@ uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
     /*Algorithm starts here*/
 
     for (i = 0; i < noOfFeatures; i++) {
-        classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
+        classMI[i] = calcMutualInformation(featureMatrix[i], classColumn, noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -127,9 +122,9 @@ uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
                         /*work out interaction*/
 
                         /*double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);*/
-                        mi = calcMutualInformation(feature2D[outputFeatures[m]], feature2D[j], noOfSamples);
+                        mi = calcMutualInformation(featureMatrix[outputFeatures[m]], featureMatrix[j], noOfSamples);
                         /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
-                        cmi = calcConditionalMutualInformation(feature2D[outputFeatures[m]], feature2D[j], classColumn, noOfSamples);
+                        cmi = calcConditionalMutualInformation(featureMatrix[outputFeatures[m]], featureMatrix[j], classColumn, noOfSamples);
                         featureInteractionMatrix[arrayPosition] = cmi - mi;
                     }/*if not already known*/
 
@@ -151,37 +146,33 @@ uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
     }/*for the number of features to select*/
 
     FREE_FUNC(classMI);
-    FREE_FUNC(feature2D);
     FREE_FUNC(featureInteractionMatrix);
     FREE_FUNC(selectedFeatures);
 
     classMI = NULL;
-    feature2D = NULL;
     featureInteractionMatrix = NULL;
     selectedFeatures = NULL;
 
     return outputFeatures;
 }/*ICAP(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
+double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    ICAP(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
+    ICAP(k, noOfSamples, noOfFeatures, intFeature2D, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -190,13 +181,11 @@ double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;

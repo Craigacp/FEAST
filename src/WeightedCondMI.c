@@ -53,8 +53,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures, double *featureScores) {
-    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, double *weightVector, int *outputFeatures, double *featureScores) {
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
     /*holds the class MI values*/
@@ -75,15 +74,11 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
         outputFeatures[j] = -1;
     }
 
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j*noOfSamples;
-    }
-
     for (i = 0; i < noOfFeatures; i++) {
         /*calculate mutual info
          **double calcWeightedMutualInformation(uint *firstVector, uint *secondVector, uint *weightVector, int vectorLength);
          */
-        classMI[i] = calcWeightedMutualInformation(feature2D[i],classColumn,weightVector,noOfSamples);
+        classMI[i] = calcWeightedMutualInformation(featureMatrix[i],classColumn,weightVector,noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -95,7 +90,7 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
     outputFeatures[0] = maxMICounter;
     featureScores[0] = maxMI;
 
-    memcpy(conditionVector,feature2D[maxMICounter],sizeof(int)*noOfSamples);
+    memcpy(conditionVector,featureMatrix[maxMICounter],sizeof(int)*noOfSamples);
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -114,7 +109,7 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
                 currentScore = 0.0;
 
                 /*double calcWeightedConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, double *weightVector, int vectorLength);*/
-                currentScore = calcWeightedConditionalMutualInformation(feature2D[j],classColumn,conditionVector,weightVector,noOfSamples);
+                currentScore = calcWeightedConditionalMutualInformation(featureMatrix[j],classColumn,conditionVector,weightVector,noOfSamples);
 
                 if (currentScore > score) {
                     score = currentScore;
@@ -128,43 +123,39 @@ int* weightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMa
 
         if (currentHighestFeature != -1) {
             selectedFeatures[currentHighestFeature] = 1;
-            mergeArrays(feature2D[currentHighestFeature],conditionVector,conditionVector,noOfSamples);
+            mergeArrays(featureMatrix[currentHighestFeature],conditionVector,conditionVector,noOfSamples);
         }
 
     }/*for the number of features to select*/
 
     FREE_FUNC(classMI);
     FREE_FUNC(conditionVector);
-    FREE_FUNC(feature2D);
     FREE_FUNC(selectedFeatures);
 
     classMI = NULL;
     conditionVector = NULL;
-    feature2D = NULL;
     selectedFeatures = NULL;
 
     return outputFeatures;
 }/*weightedCondMI(uint,uint,uint,uint[][],uint[],double[],int[],double[])*/
 
-double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
+double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     int *intOutputs = (int *) checkedCalloc(k,sizeof(int));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    weightedCondMI(k,noOfSamples,noOfFeatures,intFeatures,intClass,weightVector,intOutputs,featureScores);
+    weightedCondMI(k,noOfSamples,noOfFeatures,intFeature2D,intClass,weightVector,intOutputs,featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -173,13 +164,11 @@ double* discWeightedCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;

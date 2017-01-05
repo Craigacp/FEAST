@@ -73,6 +73,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double optionalParam1, optionalParam2;
     int numberOfFeatures, numberOfSamples, numberOfWeights, numberOfTargets;
     double *featureMatrix, *targets, *weightVector, *output, *outputFeatures, *scores;
+    double **feature2D;
 
     double entropyTest;
     int i, j;
@@ -150,6 +151,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             } else {
                 scores = (double *) mxCalloc(k, sizeof(double));
             }
+            feature2D = generateDoubleIndices(featureMatrix,numberOfSamples,numberOfFeatures);
             /*printf("Flag = %d, k = %d, numFeatures = %d, numSamples = %d\n",flag,k,numberOfFeatures,numberOfSamples);*/
             switch (flag) {
                 case 3: /* CMIM */
@@ -157,7 +159,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    discWeightedCMIM(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+                    discWeightedCMIM(k, numberOfSamples, numberOfFeatures, feature2D, targets, weightVector, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -167,7 +169,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    discWeightedJMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+                    discWeightedJMI(k, numberOfSamples, numberOfFeatures, feature2D, targets, weightVector, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -177,7 +179,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    discWeightedDISR(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+                    discWeightedDISR(k, numberOfSamples, numberOfFeatures, feature2D, targets, weightVector, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -186,7 +188,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 {
                     output = (double *) mxCalloc(k, sizeof(double));
 
-                    discWeightedCondMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, weightVector, output, scores);
+                    discWeightedCondMI(k, numberOfSamples, numberOfFeatures, feature2D, targets, weightVector, output, scores);
 
                     i = 0;
 
@@ -211,6 +213,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     break;
                 }
             }/*switch on flag*/
+            mxFree(feature2D);
             if (nlhs == 1) {
                 mxFree(scores);
             }

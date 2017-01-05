@@ -74,6 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double optionalParam1, optionalParam2;
     int numberOfFeatures, numberOfSamples, numberOfTargets;
     double *featureMatrix, *targets, *output, *outputFeatures, *scores;
+    double **feature2D;
 
     double entropyTest;
     int i, j;
@@ -156,6 +157,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             } else {
                 scores = (double *) mxCalloc(k, sizeof(double));
             }
+            feature2D = generateDoubleIndices(featureMatrix,numberOfSamples,numberOfFeatures);
+
             /*printf("Flag = %d, k = %d, numFeatures = %d, numSamples = %d\n",flag,k,numberOfFeatures,numberOfSamples);*/
             switch (flag) {
                 case 1: /* MIFS */
@@ -168,8 +171,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                         optionalParam2 = 0.0;
                     }
 
-                    /*double* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
-                    discBetaGamma(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores, optionalParam1, optionalParam2);
+                    /*double* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
+                    discBetaGamma(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores, optionalParam1, optionalParam2);
 
                     incrementVector(output, k);
                     break;
@@ -179,8 +182,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    /*double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores)*/
-                    disc_mRMR_D(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    /*double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores)*/
+                    disc_mRMR_D(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -190,8 +193,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    /*double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores)*/
-                    discCMIM(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    /*double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores)*/
+                    discCMIM(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -201,8 +204,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    /*double* JMI(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores)*/
-                    discJMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    /*double* JMI(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores)*/
+                    discJMI(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -212,8 +215,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    /*double* discDISR(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores)*/
-                    discDISR(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    /*double* discDISR(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores)*/
+                    discDISR(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -227,8 +230,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     optionalParam1 = 1.0;
                     optionalParam2 = 1.0;
 
-                    /*double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
-                    discBetaGamma(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores, optionalParam1, optionalParam2);
+                    /*double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *feature2D, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
+                    discBetaGamma(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores, optionalParam1, optionalParam2);
 
                     incrementVector(output, k);
                     break;
@@ -238,8 +241,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                     output = (double *) mxGetPr(plhs[0]);
 
-                    /*double* discICAP(uint k,uint numberOfSamples,uint numberOfFeatures,double *featureMatrix, double *targets, double *output, double *featureScores);*/
-                    discICAP(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    /*double* discICAP(uint k,uint numberOfSamples,uint numberOfFeatures,double *feature2D, double *targets, double *output, double *featureScores);*/
+                    discICAP(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     incrementVector(output, k);
                     break;
@@ -254,7 +257,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     optionalParam2 = 1.0;
 
                     /*double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
-                    discBetaGamma(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores, optionalParam1, optionalParam2);
+                    discBetaGamma(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores, optionalParam1, optionalParam2);
 
                     incrementVector(output, k);
                     break;
@@ -267,13 +270,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                         if (nlhs == 2) {
                             plhs[1] = mxCreateDoubleMatrix(0, 0, mxREAL);
                         }
+                        mxFree(feature2D);
                         return;
                     } else {
                         plhs[0] = mxCreateDoubleMatrix(k, 1, mxREAL);
                         output = (double *) mxGetPr(plhs[0]);
 
                         /*double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma)*/
-                        discBetaGamma(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores, optionalParam1, optionalParam2);
+                        discBetaGamma(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores, optionalParam1, optionalParam2);
 
                         incrementVector(output, k);
                     }
@@ -284,7 +288,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     output = (double *) mxCalloc(k, sizeof(double));
 
                     /*double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures,double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores)*/
-                    discCondMI(k, numberOfSamples, numberOfFeatures, featureMatrix, targets, output, scores);
+                    discCondMI(k, numberOfSamples, numberOfFeatures, feature2D, targets, output, scores);
 
                     i = 0;
 
@@ -304,6 +308,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     break;
                 }
             }/*switch on flag*/
+            mxFree(feature2D);
             if (nlhs == 1) {
                 mxFree(scores);
             }

@@ -58,7 +58,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/MutualInformation.h"
 
-uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
+uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     /*holds the class MI values
      **the class MI doubles as the partial score from the CMIM paper
      */
@@ -75,14 +75,8 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
 
     int i,j;
 
-    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
-
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j*noOfSamples;
-    }
-
     for (i = 0; i < noOfFeatures; i++) {
-        classMI[i] = calcMutualInformation(feature2D[i],classColumn,noOfSamples);
+        classMI[i] = calcMutualInformation(featureMatrix[i],classColumn,noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -106,7 +100,7 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
             while ((classMI[j] > score) && (lastUsedFeature[j] < i)) {
                 /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
                 currentFeature = outputFeatures[lastUsedFeature[j]];
-                conditionalInfo = calcConditionalMutualInformation(feature2D[j],classColumn,feature2D[currentFeature],noOfSamples);
+                conditionalInfo = calcConditionalMutualInformation(featureMatrix[j],classColumn,featureMatrix[currentFeature],noOfSamples);
                 if (classMI[j] > conditionalInfo) {
                     classMI[j] = conditionalInfo;
                 }/*reset classMI*/
@@ -123,34 +117,30 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
 
     FREE_FUNC(classMI);
     FREE_FUNC(lastUsedFeature);
-    FREE_FUNC(feature2D);
 
     classMI = NULL;
     lastUsedFeature = NULL;
-    feature2D = NULL;
 
     return outputFeatures;
 }/*CMIM(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
+double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    CMIM(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
+    CMIM(k, noOfSamples, noOfFeatures, intFeature2D, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -159,13 +149,11 @@ double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;

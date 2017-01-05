@@ -81,8 +81,8 @@
 ** "Feature Selection Based on Mutual Information: Criteria of Max-Dependency, Max-Relevance, and Min-Redundancy"
 ** H. Peng et al. IEEE Pattern Analysis and Machine Intelligence (PAMI) (2005)
 *******************************************************************************/
-uint* mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** CMIM() implements a discrete version of the 
@@ -92,8 +92,8 @@ double* disc_mRMR_D(uint k, uint noOfSamples, uint noOfFeatures, double *feature
 ** "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
 ** F. Fleuret, JMLR (2004)
 *******************************************************************************/
-uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** JMI() implements the JMI criterion from
@@ -101,8 +101,8 @@ double* discCMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
 ** "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
 ** H. Yang and J. Moody, NIPS (1999)
 *******************************************************************************/
-uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* JMI(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** DISR() implements the Double Input Symmetrical Relevance criterion
@@ -111,8 +111,8 @@ double* discJMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
 ** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
 ** P. Meyer and G. Bontempi, (2006)
 *******************************************************************************/
-uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** ICAP() implements the Interaction Capping criterion from 
@@ -120,8 +120,8 @@ double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
 ** "Machine Learning Based on Attribute Interactions"
 ** A. Jakulin, PhD Thesis (2005)
 *******************************************************************************/
-uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* ICAP(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** CondMI() implements the CMI criterion using a greedy forward search
@@ -129,14 +129,14 @@ double* discICAP(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
 ** It returns an int array, not a uint array, as -1 is a sentinel value 
 ** signifying there was not enough information to select a feature.
 *******************************************************************************/
-int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, int *outputFeatures, double *featureScores);
-double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+int* CondMI(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, int *outputFeatures, double *featureScores);
+double* discCondMI(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** MIM() implements the MIM criterion using a greedy forward search
 *******************************************************************************/
-uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
-double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
+uint* MIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores);
+double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
 ** betaGamma() implements the Beta-Gamma space from Brown (2009).
@@ -153,7 +153,7 @@ double* discMIM(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatr
 ** G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
 ** Journal of Machine Learning Research (JMLR), 2011
 *******************************************************************************/
-uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores, double beta, double gamma);
-double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma);
+uint* BetaGamma(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores, double beta, double gamma);
+double* discBetaGamma(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores, double beta, double gamma);
 
 #endif

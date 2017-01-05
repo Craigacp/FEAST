@@ -58,8 +58,7 @@
 #include "MIToolbox/Entropy.h"
 #include "MIToolbox/ArrayOperations.h"
 
-uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
-    uint **feature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
+uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
     /*holds the class MI values*/
@@ -83,10 +82,6 @@ uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
 
     int i, j, x;
 
-    for (j = 0; j < noOfFeatures; j++) {
-        feature2D[j] = featureMatrix + j*noOfSamples;
-    }
-
     for (i = 0; i < sizeOfMatrix; i++) {
         featureMIMatrix[i] = -1;
     }/*for featureMIMatrix - blank to -1*/
@@ -95,7 +90,7 @@ uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
         /*calculate mutual info
          **double calcMutualInformation(uint *firstVector, uint *secondVector, int vectorLength);
          */
-        classMI[i] = calcMutualInformation(feature2D[i], classColumn, noOfSamples);
+        classMI[i] = calcMutualInformation(featureMatrix[i], classColumn, noOfSamples);
 
         if (classMI[i] > maxMI) {
             maxMI = classMI[i];
@@ -131,7 +126,7 @@ uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
                          **double calcJointEntropy(uint *firstVector, uint *secondVector, int vectorLength);
                          */
 
-                        mergeArrays(feature2D[outputFeatures[x]], feature2D[j], mergedVector, noOfSamples);
+                        mergeArrays(featureMatrix[outputFeatures[x]], featureMatrix[j], mergedVector, noOfSamples);
                         mi = calcMutualInformation(mergedVector, classColumn, noOfSamples);
                         tripEntropy = calcJointEntropy(mergedVector, classColumn, noOfSamples);
 
@@ -155,38 +150,34 @@ uint* DISR(uint k, uint noOfSamples, uint noOfFeatures, uint *featureMatrix, uin
 
     FREE_FUNC(classMI);
     FREE_FUNC(mergedVector);
-    FREE_FUNC(feature2D);
     FREE_FUNC(featureMIMatrix);
     FREE_FUNC(selectedFeatures);
 
     classMI = NULL;
     mergedVector = NULL;
-    feature2D = NULL;
     featureMIMatrix = NULL;
     selectedFeatures = NULL;
 
     return outputFeatures;
 }/*DISR(uint,uint,uint,uint[][],uint[],uint[],double[])*/
 
-double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
+double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *outputFeatures, double *featureScores) {
     uint *intFeatures = (uint *) checkedCalloc(noOfSamples*noOfFeatures,sizeof(uint));
     uint *intClass = (uint *) checkedCalloc(noOfSamples,sizeof(uint));
     uint *intOutputs = (uint *) checkedCalloc(k,sizeof(uint));
 
-    double **feature2D = (double**) checkedCalloc(noOfFeatures,sizeof(double*));
     uint **intFeature2D = (uint**) checkedCalloc(noOfFeatures,sizeof(uint*));
 
     int i;
 
     for (i = 0; i < noOfFeatures; i++) {
-        feature2D[i] = featureMatrix + i*noOfSamples;
         intFeature2D[i] = intFeatures + i*noOfSamples;
-        normaliseArray(feature2D[i],intFeature2D[i],noOfSamples);
+        normaliseArray(featureMatrix[i],intFeature2D[i],noOfSamples);
     }
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    DISR(k, noOfSamples, noOfFeatures, intFeatures, intClass, intOutputs, featureScores);
+    DISR(k, noOfSamples, noOfFeatures, intFeature2D, intClass, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
@@ -195,13 +186,11 @@ double* discDISR(uint k, uint noOfSamples, uint noOfFeatures, double *featureMat
     FREE_FUNC(intFeatures);
     FREE_FUNC(intClass);
     FREE_FUNC(intOutputs);
-    FREE_FUNC(feature2D);
     FREE_FUNC(intFeature2D);
 
     intFeatures = NULL;
     intClass = NULL;
     intOutputs = NULL;
-    feature2D = NULL;
     intFeature2D = NULL;
 
     return outputFeatures;
