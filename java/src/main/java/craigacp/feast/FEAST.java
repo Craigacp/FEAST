@@ -41,7 +41,7 @@ public abstract class FEAST {
     }
     
     private static ScoredFeatures condMIFixup(ScoredFeatures f) {
-        int maxVal = 0;
+        int maxVal = f.featureIndices.length;
         for (int i = 0; i < f.featureIndices.length; i++) {
             if (f.featureIndices[i] == -1) {
                maxVal = i;
