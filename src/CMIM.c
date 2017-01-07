@@ -59,6 +59,7 @@
 #include "MIToolbox/MutualInformation.h"
 
 uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores) {
+    char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
     /*holds the class MI values
      **the class MI doubles as the partial score from the CMIM paper
      */
@@ -86,6 +87,7 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, ui
 
     outputFeatures[0] = maxMICounter;
     featureScores[0] = maxMI;
+    selectedFeatures[maxMICounter] = 1;
 
     /*****************************************************************************
      ** We have populated the classMI array, and selected the highest
@@ -94,25 +96,28 @@ uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, ui
      *****************************************************************************/
 
     for (i = 1; i < k; i++) {
-        score = 0.0;
+        score = -1.0;
 
         for (j = 0; j < noOfFeatures; j++) {
-            while ((classMI[j] > score) && (lastUsedFeature[j] < i)) {
-                /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
-                currentFeature = outputFeatures[lastUsedFeature[j]];
-                conditionalInfo = calcConditionalMutualInformation(featureMatrix[j],classColumn,featureMatrix[currentFeature],noOfSamples);
-                if (classMI[j] > conditionalInfo) {
-                    classMI[j] = conditionalInfo;
-                }/*reset classMI*/
-                /*moved due to C indexing from 0 rather than 1*/
-                lastUsedFeature[j] += 1;
-            }/*while partial score greater than score & not reached last feature*/
-            if (classMI[j] > score) {
-                score = classMI[j];
-                featureScores[i] = score;
-                outputFeatures[i] = j;
-            }/*if partial score still greater than score*/
+            if (selectedFeatures[j] == 0) {
+                while ((classMI[j] > score) && (lastUsedFeature[j] < i)) {
+                    /*double calcConditionalMutualInformation(uint *firstVector, uint *targetVector, uint *conditionVector, int vectorLength);*/
+                    currentFeature = outputFeatures[lastUsedFeature[j]];
+                    conditionalInfo = calcConditionalMutualInformation(featureMatrix[j],classColumn,featureMatrix[currentFeature],noOfSamples);
+                    if (classMI[j] > conditionalInfo) {
+                        classMI[j] = conditionalInfo;
+                    }/*reset classMI*/
+                    /*moved due to C indexing from 0 rather than 1*/
+                    lastUsedFeature[j] += 1;
+                }/*while partial score greater than score & not reached last feature*/
+                if (classMI[j] > score) {
+                    score = classMI[j];
+                    featureScores[i] = score;
+                    outputFeatures[i] = j;
+                }/*if partial score still greater than score*/
+            }
         }/*for number of features*/
+        selectedFeatures[outputFeatures[i]] = 1;
     }/*for the number of features to select*/
 
     FREE_FUNC(classMI);
