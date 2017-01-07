@@ -90,6 +90,12 @@ uint* weightedJMI(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMat
 double* discWeightedJMI(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
 
 /*******************************************************************************
+** WeightedMIM() implements the MIM criterion using a greedy forward search
+*******************************************************************************/
+uint* weightedMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores);
+double* discWeightedMIM(uint k, uint noOfSamples, uint noOfFeatures, double **featureMatrix, double *classColumn, double *weightVector, double *outputFeatures, double *featureScores);
+
+/*******************************************************************************
 ** weightedDISR() implements the Double Input Symmetrical Relevance criterion
 ** from
 ** 
