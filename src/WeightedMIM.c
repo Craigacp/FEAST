@@ -50,7 +50,7 @@
 #include "MIToolbox/ArrayOperations.h"
 #include "MIToolbox/WeightedMutualInformation.h"
 
-uint* WeightedMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
+uint* weightedMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, double *weightVector, uint *outputFeatures, double *featureScores) {
     char *selectedFeatures = (char *) checkedCalloc(noOfFeatures,sizeof(char));
 
     /*holds the class MI values*/
@@ -125,7 +125,7 @@ double* discWeightedMIM(uint k, uint noOfSamples, uint noOfFeatures, double **fe
 
     normaliseArray(classColumn,intClass,noOfSamples);
 
-    WeightedMIM(k, noOfSamples, noOfFeatures, intFeature2D, intClass, weightVector, intOutputs, featureScores);
+    weightedMIM(k, noOfSamples, noOfFeatures, intFeature2D, intClass, weightVector, intOutputs, featureScores);
 
     for (i = 0; i < k; i++) {
         outputFeatures[i] = intOutputs[i];
