@@ -20,6 +20,10 @@ public abstract class FEAST {
 
     private FEAST() {}
 
+    static {
+        System.loadLibrary("feast-java");
+    }
+
     public static native ScoredFeatures BetaGamma(int numFeatures, int[][] dataMatrix, int[] labels, double beta, double gamma);
 
     public static <T> ScoredFeatures BetaGamma(int numFeatures, List<List<T>> dataMatrix, List<T> labels, double beta, double gamma) {

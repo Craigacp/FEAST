@@ -41,6 +41,8 @@ CFLAGS = -O3 -fPIC -std=c89 -Wall -Werror
 CC = gcc
 LINKER = gcc
 INCLUDES = -I../MIToolbox/include -Iinclude
+JNI_INCLUDES = -I/usr/lib/jvm/java-8-openjdk-amd64/include/ -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
+JAVA_INCLUDES = -Ijava/native/include
 objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.o build/JMI.o build/MIM.o build/mRMR_D.o build/WeightedCMIM.o build/WeightedCondMI.o build/WeightedDISR.o build/WeightedJMI.o 
 
 libFSToolbox.so : $(objects)
@@ -50,7 +52,13 @@ build/%.o: src/%.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $<
 	
+java: java/build/native/lib/libfeast-java.so
+
+java/build/native/lib/libfeast-java.so: java/src/native/FEASTJNI.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(JNI_INCLUDES) $(JAVA_INCLUDES) -DCOMPILE_C -shared -o $@ java/src/native/FEASTJNI.c -lm -lMIToolbox -lFSToolbox
+
 .PHONY : debug x86 x64 intel clean install
+
 debug:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -g -DDEBUG -fPIC"
 	
