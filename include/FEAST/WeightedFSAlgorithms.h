@@ -11,11 +11,11 @@
 ** Part of the FEAture Selection Toolbox (FEAST), please reference
 ** "Information Theoretic Feature Selection for Cost-Sensitive Problems"
 ** A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown
-** ArXiv, 2016
+** ArXiv, 2017
 **
-** Please check www.cs.manchester.ac.uk/~gbrown/fstoolbox for updates.
+** Please check www.github.com/Craigacp/FEAST for updates.
 ** 
-** Copyright (c) 2010-2016, A. Pocock, G. Brown, The University of Manchester
+** Copyright (c) 2010-2017, A. Pocock, G. Brown, The University of Manchester
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without modification,

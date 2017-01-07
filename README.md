@@ -108,7 +108,7 @@ Compilation instructions:
  - Linux C shared library - use the included makefile
 
 Update History
- - xx/09/2016 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability.
+ - 07/01/2017 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability. FEAST functions now return the internal scores assigned by each criteria as well. Added a Java API via JNI. FEAST v2 is approximately 30% faster when called from Matlab.
  - 12/03/2016 - v1.1.4 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
  - 12/10/2014 - v1.1.2 - Updated documentation to note that FEAST expects column-major matrices.
  - 11/06/2014 - v1.1.1 - Fixed an issue where MIM wasn't compiled into libFSToolbox.
