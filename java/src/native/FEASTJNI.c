@@ -107,11 +107,10 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     jclass cls;
     jmethodID midInit;
     jobject scoredFeatures;
-    int i;
+    int i,j;
     uint **udata;
     uint *ulabels, *uindices;
     
-    printf("Extracting labels\n");
     /* Extract a C array for the labels */
     labels = (*env)->GetIntArrayElements(env, javaLabels, NULL);
     if (labels == NULL) {
@@ -119,16 +118,19 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     }
     numLabels = (*env)->GetArrayLength(env, javaLabels);
 
-    printf("Extracting data\n");
     /* Extract a C array for the data */
     numFeatures = (*env)->GetArrayLength(env, javaData);
     data = calloc(numFeatures, sizeof(int*));
     for (i = 0; i < numFeatures; i++) {
         feature = (jintArray)(*env)->GetObjectArrayElement(env, javaData, i);
         data[i] = (*env)->GetIntArrayElements(env, feature, NULL);
+        for (j = 0; j < numLabels; j++) {
+            if (data[i][j] < 0) {
+                printf("Found negative value %d at location data[%d][%d]\n",data[i][j],i,j);
+            }
+        }
     }
 
-    printf("Mallocing output memory\n");
     /* Malloc space for indices and scores */
     scores = calloc(numToSelect, sizeof(double));
     indices = calloc(numToSelect, sizeof(int));
@@ -139,7 +141,6 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     /* The cast from int** to uint** could cause problems on different architectures.
        The Java code above this should verify all integers are non-negative otherwise 
        things will crash. */
-    printf("Running FS\n");
     switch (flag) {
         case 1: /* CMIM */
             /* uint* CMIM(uint k, uint noOfSamples, uint noOfFeatures, uint **featureMatrix, uint *classColumn, uint *outputFeatures, double *featureScores); */
@@ -169,7 +170,6 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     }
     free(data);
     
-    printf("Copying out scores to java\n");
     /* Copy out the scores array */
     javaScores = (*env)->NewDoubleArray(env, numToSelect);
     if (javaScores == NULL) {
@@ -178,7 +178,6 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     (*env)->SetDoubleArrayRegion(env, javaScores, 0 , numToSelect, scores);
     free(scores);
 
-    printf("Copying out indices to java\n");
     /* Copy out the indices array */
     javaIndices = (*env)->NewIntArray(env, numToSelect);
     if (javaIndices == NULL) {
@@ -187,7 +186,6 @@ JNIEXPORT jobject JNICALL Java_craigacp_feast_FEAST_feast(JNIEnv * env, jclass c
     (*env)->SetIntArrayRegion(env, javaIndices, 0 , numToSelect, indices);
     free(indices);
 
-    printf("Creating ScoredFeatures\n");
     /* Create the ScoredFeatures object and return it */
     cls = (*env)->FindClass(env, "craigacp/feast/ScoredFeatures");
     midInit = (*env)->GetMethodID(env, cls, "<init>", "([I[D)V");

@@ -23,16 +23,15 @@ public class Test {
                 if (line != null) {
                     String[] splitLine = line.split(",");
                     labels.add(Integer.parseInt(splitLine[labelIndex]));
+                    if (data.isEmpty()) {
+                        for (int i = 0; i < splitLine.length-1; i++) {
+                            data.add(new ArrayList<>());
+                        }
+                    }
                     for (int i = 0; i < splitLine.length; i++) {
                         if (i < labelIndex) {
-                            while (i > data.size()) {
-                                data.add(new ArrayList<>());
-                            }
                             data.get(i).add(Integer.parseInt(splitLine[i]));
                         } else if (i > labelIndex) {
-                            while (i > data.size()-1) {
-                                data.add(new ArrayList<>());
-                            }
                             data.get(i-1).add(Integer.parseInt(splitLine[i]));
                         }
                     }
@@ -41,6 +40,9 @@ public class Test {
 
             int[] labelsArray = FEASTUtil.convertList(labels);
             int[][] dataArray = FEASTUtil.convertMatrix(data);
+
+            System.out.println("Dataset loaded from " + filename);
+            System.out.println("Found " + labelsArray.length + " labels and " + dataArray.length + " features.");
 
             return new Dataset(labelsArray,dataArray);
         } catch (FileNotFoundException e) {
@@ -146,6 +148,7 @@ public class Test {
         if ((dataset != null) && (fsMethod != null)) {
             if (numFeatures == -1) {
                 numFeatures = dataset.data.length;
+                System.out.println("Setting numFeatures to " + numFeatures);
             }
             ScoredFeatures output = null;
             //{CIFE,CMIM,CondMI,DISR,ICAP,JMI,MIM,mRMR}
