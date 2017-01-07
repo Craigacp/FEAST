@@ -1,17 +1,8 @@
 #include <jni.h>
 #include <stdlib.h>
 #include <FEAST/FSAlgorithms.h>
+#include "FEASTJNIUtil.h"
 #include "craigacp_feast_FEAST.h"
-
-jint throwOutOfMemoryError(JNIEnv *env, char *message)
-{
-    jclass exClass;
-    char *className = "java/lang/OutOfMemoryError" ;
-
-    exClass = (*env)->FindClass(env, className);
-
-    return (*env)->ThrowNew(env, exClass, message);
-}
 
 /*
  * Class:     craigacp_feast_FEAST

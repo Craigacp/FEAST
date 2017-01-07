@@ -65,6 +65,8 @@ public class Test {
         buffer.append("         Index of the label in the csv.\n");
         buffer.append("     -n <int>\n");
         buffer.append("         Number of features to select. Defaults to a full ranking.\n");
+        buffer.append("     -w \n");
+        buffer.append("         Test weighted variant with all weights = 1.\n");
 
         return buffer.toString();
     }
@@ -74,6 +76,8 @@ public class Test {
         String fsMethod = null;
         int numFeatures = -1;
         int labelIndex = -1;
+        boolean weighted = false;
+        double[] weights;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -129,6 +133,9 @@ public class Test {
                         return;
                     }
                     break;
+                case "-w":
+                    weighted = true;
+                    break;
                 default:
                     System.err.println("Unknown argument " + args[i]);
                     System.err.println(usage());
@@ -151,50 +158,98 @@ public class Test {
                 System.out.println("Setting numFeatures to " + numFeatures);
             }
             ScoredFeatures output = null;
-            //{CIFE,CMIM,CondMI,DISR,ICAP,JMI,MIM,mRMR}
-            switch (fsMethod) {
-                case "cife":
-                case "CIFE":
-                case "fou":
-                case "FOU":
-                    output = FEAST.BetaGamma(numFeatures, dataset.data, dataset.labels, 1.0, 1.0);
-                    break;
-                case "cmim":
-                case "CMIM":
-                    output = FEAST.CMIM(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "condmi":
-                case "CondMI":
-                    output = FEAST.CondMI(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "disr":
-                case "DISR":
-                    output = FEAST.DISR(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "icap":
-                case "ICAP":
-                    output = FEAST.ICAP(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "jmi":
-                case "JMI":
-                    output = FEAST.JMI(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "mifs":
-                case "MIFS":
-                    output = FEAST.BetaGamma(numFeatures, dataset.data, dataset.labels, 1.0, 0.0);
-                    break;
-                case "mim":
-                case "MIM":
-                    output = FEAST.MIM(numFeatures, dataset.data, dataset.labels);
-                    break;
-                case "mrmr":
-                case "mRMR":
-                    output = FEAST.mRMR(numFeatures, dataset.data, dataset.labels);
-                    break;
-                default:
-                    System.err.println("Unknown fs method " + fsMethod);
-                    System.err.println(usage());
-                    return;
+            if (weighted) {
+                weights = new double[dataset.labels.length];
+                for (int i = 0; i < weights.length; i++) {
+                    weights[i] = 1.0;
+                }
+                //{CMIM,CondMI,DISR,JMI,MIM}
+                switch (fsMethod) {
+                    case "cmim":
+                    case "CMIM":
+                        System.out.println("Using weighted CMIM");
+                        output = WeightedFEAST.CMIM(numFeatures, dataset.data, dataset.labels, weights);
+                        break;
+                    case "condmi":
+                    case "CondMI":
+                        System.out.println("Using weighted CondMI");
+                        output = WeightedFEAST.CondMI(numFeatures, dataset.data, dataset.labels, weights);
+                        break;
+                    case "disr":
+                    case "DISR":
+                        System.out.println("Using weighted DISR");
+                        output = WeightedFEAST.DISR(numFeatures, dataset.data, dataset.labels, weights);
+                        break;
+                    case "jmi":
+                    case "JMI":
+                        System.out.println("Using weighted JMI");
+                        output = WeightedFEAST.JMI(numFeatures, dataset.data, dataset.labels, weights);
+                        break;
+                    case "mim":
+                    case "MIM":
+                        System.out.println("Using weighted MIM");
+                        output = WeightedFEAST.MIM(numFeatures, dataset.data, dataset.labels, weights);
+                        break;
+                    default:
+                        System.err.println("Unknown weighted fs method " + fsMethod);
+                        System.err.println(usage());
+                        return;
+                }
+            } else {
+                //{CIFE,CMIM,CondMI,DISR,ICAP,JMI,MIFS,MIM,mRMR}
+                switch (fsMethod) {
+                    case "cife":
+                    case "CIFE":
+                    case "fou":
+                    case "FOU":
+                        System.out.println("Using CIFE/FOU");
+                        output = FEAST.BetaGamma(numFeatures, dataset.data, dataset.labels, 1.0, 1.0);
+                        break;
+                    case "cmim":
+                    case "CMIM":
+                        System.out.println("Using CMIM");
+                        output = FEAST.CMIM(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "condmi":
+                    case "CondMI":
+                        System.out.println("Using CondMI");
+                        output = FEAST.CondMI(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "disr":
+                    case "DISR":
+                        System.out.println("Using DISR");
+                        output = FEAST.DISR(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "icap":
+                    case "ICAP":
+                        System.out.println("Using ICAP");
+                        output = FEAST.ICAP(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "jmi":
+                    case "JMI":
+                        System.out.println("Using JMI");
+                        output = FEAST.JMI(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "mifs":
+                    case "MIFS":
+                        System.out.println("Using MIFS");
+                        output = FEAST.BetaGamma(numFeatures, dataset.data, dataset.labels, 1.0, 0.0);
+                        break;
+                    case "mim":
+                    case "MIM":
+                        System.out.println("Using MIM");
+                        output = FEAST.MIM(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    case "mrmr":
+                    case "mRMR":
+                        System.out.println("Using mRMR");
+                        output = FEAST.mRMR(numFeatures, dataset.data, dataset.labels);
+                        break;
+                    default:
+                        System.err.println("Unknown fs method " + fsMethod);
+                        System.err.println(usage());
+                        return;
+                }
             }
 
             if (output != null) {

@@ -54,8 +54,8 @@ build/%.o: src/%.c
 	
 java: java/build/native/lib/libfeast-java.so
 
-java/build/native/lib/libfeast-java.so: java/src/native/FEASTJNI.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(JNI_INCLUDES) $(JAVA_INCLUDES) -DCOMPILE_C -shared -o $@ java/src/native/FEASTJNI.c -lm -lMIToolbox -lFSToolbox
+java/build/native/lib/libfeast-java.so: java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(JNI_INCLUDES) $(JAVA_INCLUDES) -DCOMPILE_C -shared -o $@ java/src/native/FEASTJNIUtil.c java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c -lm -lMIToolbox -lFSToolbox
 
 .PHONY : debug x86 x64 intel clean install
 
