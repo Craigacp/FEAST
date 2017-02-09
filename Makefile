@@ -37,7 +37,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 PREFIX = /usr/local
-CFLAGS = -O3 -fPIC -std=c89 -Wall -Werror
+CFLAGS = -O3 -fPIC -std=c89 -pedantic -Wall -Werror
 CC = gcc
 LINKER = gcc
 INCLUDES = -I../MIToolbox/include -Iinclude
