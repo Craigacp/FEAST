@@ -106,6 +106,10 @@ processes.
 Compilation instructions:
  - MATLAB/OCTAVE - run CompileFEAST.m
  - Linux C shared library - use the included makefile
+ - Windows C dll (expects pre built libMIToolbox.a)
+	- install MinGW from https://sourceforge.net/projects/mingw-w64/
+	- add MinGW binaries folders to PATH, e.g. mingw/bin, mingw/msys/bin 
+	- run the included makefile by > make x64_win
 
 Update History
  - 07/01/2017 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability. FEAST functions now return the internal scores assigned by each criteria as well. Added a Java API via JNI. FEAST v2 is approximately 30% faster when called from Matlab.

@@ -41,6 +41,7 @@ CFLAGS = -O3 -fPIC -std=c89 -pedantic -Wall -Werror
 CC = gcc
 LINKER = gcc
 INCLUDES = -I../MIToolbox/include -Iinclude
+MITOOLBOX_AR = ../MIToolbox/libMIToolbox.a
 JNI_INCLUDES = -I/usr/lib/jvm/java-8-openjdk-amd64/include/ -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
 JAVA_INCLUDES = -Ijava/native/include
 objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.o build/JMI.o build/MIM.o build/mRMR_D.o build/WeightedCMIM.o build/WeightedCondMI.o build/WeightedDISR.o build/WeightedJMI.o build/WeightedMIM.o
@@ -48,9 +49,12 @@ objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.
 libFSToolbox.so : $(objects)
 	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
 
+libFSToolbox.dll : $(objects)
+	$(LINKER) -shared -o libFSToolbox.dll $(objects) $(MITOOLBOX_AR)
+
 build/%.o: src/%.c 
 	@mkdir -p build
-	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $<
+	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $< -l$(MITOOLBOX_AR)
 	
 java: java/build/native/lib/libfeast-java.so
 
@@ -68,6 +72,9 @@ x86:
 x64:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -O3 -fPIC -m64"
 
+x64_win:
+	$(MAKE) libFSToolbox.dll "CFLAGS = -O3 -m64"
+
 intel:
 	$(MAKE) libFSToolbox.so "COMPILER = icc" "LINKER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
 
@@ -75,6 +82,7 @@ clean:
 	-rm -fr build
 	-rm -f matlab/*.o matlab/*.mex*
 	-rm -f libFSToolbox.so
+	-rm -f libFSToolbox.dll
 
 install:
 	$(MAKE)
