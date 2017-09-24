@@ -106,7 +106,7 @@ processes.
 Compilation instructions:
  - MATLAB/OCTAVE - run CompileFEAST.m
  - Linux C shared library - use the included makefile
- - Windows C dll (expects pre built libMIToolbox.a)
+ - Windows C dll (expects pre built libMIToolbox.dll)
 	- install MinGW from https://sourceforge.net/projects/mingw-w64/
 	- add MinGW binaries folders to PATH, e.g. mingw/bin, mingw/msys/bin 
 	- run the included makefile by > make x64_win
