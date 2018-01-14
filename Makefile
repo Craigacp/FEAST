@@ -56,9 +56,10 @@ build/%.o: src/%.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $<
 	
-java: java/build/native/lib/libfeast-java.so
+java: java/src/main/resources/libfeast-java.so
 
-java/build/native/lib/libfeast-java.so: java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c
+java/src/main/resources/libfeast-java.so: java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c
+	@mkdir -p java/src/main/resources
 	$(CC) $(CFLAGS) $(INCLUDES) $(JNI_INCLUDES) $(JAVA_INCLUDES) -DCOMPILE_C -shared -o $@ java/src/native/FEASTJNIUtil.c java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c -lm -lMIToolbox -lFSToolbox
 
 .PHONY : debug x86 x64 intel clean install
@@ -80,6 +81,7 @@ intel:
 
 clean:
 	-rm -fr build
+	-rm -f java/src/main/resources/libfeast-java.so
 	-rm -f matlab/*.o matlab/*.mex*
 	-rm -f libFSToolbox.so
 	-rm -f libFSToolbox.dll
