@@ -5,9 +5,9 @@
 ** Author - Adam Pocock
 ** 
 ** Part of the Feature Selection Toolbox, please reference
-** "Information Theoretic Feature Selection for Cost-Sensitive Problems"
-** A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown
-** ArXiv, 2017
+** "Feature Selection via Joint Likelihood"
+** A. Pocock
+** University of Manchester, 2012
 **
 ** Please check www.github.com/Craigacp/FEAST for updates.
 ** 
