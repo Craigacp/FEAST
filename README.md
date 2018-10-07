@@ -16,12 +16,12 @@ and our results are presented in the following paper:
  Journal of Machine Learning Research, 13:27-66 (2012)
 ```
 
-The weighted feature selection algorithms are described in:
+The weighted feature selection algorithms are described in Chapter 7 of:
 
 ```
- Information Theoretic Feature Selection for Cost-Sensitive Problems
- A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown.
- ArXiv
+ Feature Selection via Joint Likelihood
+ A. Pocock
+ PhD Thesis, University of Manchester, 2012
 ```
 
 If you use these implementations for academic research please cite the relevant paper
