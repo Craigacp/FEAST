@@ -41,6 +41,7 @@ CFLAGS = -O3 -fPIC -std=c89 -pedantic -Wall -Werror
 CC = gcc
 LINKER = gcc
 INCLUDES = -I../MIToolbox/include -Iinclude
+LIBS = -L../MIToolbox
 JNI_INCLUDES = -I/usr/lib/jvm/java-8-openjdk-amd64/include/ -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
 JAVA_INCLUDES = -Ijava/native/include
 objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.o build/JMI.o build/MIM.o build/mRMR_D.o build/WeightedCMIM.o build/WeightedCondMI.o build/WeightedDISR.o build/WeightedJMI.o build/WeightedMIM.o
@@ -48,13 +49,17 @@ objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.
 libFSToolbox.so : $(objects)
 	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
 
+libFSToolbox.dll : $(objects)
+	$(LINKER) -shared -o libFSToolbox.dll $(objects) $(LIBS) -lm -lMIToolbox
+
 build/%.o: src/%.c 
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(INCLUDES) -DCOMPILE_C -o build/$*.o -c $<
 	
-java: java/build/native/lib/libfeast-java.so
+java: java/src/main/resources/libfeast-java.so
 
-java/build/native/lib/libfeast-java.so: java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c
+java/src/main/resources/libfeast-java.so: java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c
+	@mkdir -p java/src/main/resources
 	$(CC) $(CFLAGS) $(INCLUDES) $(JNI_INCLUDES) $(JAVA_INCLUDES) -DCOMPILE_C -shared -o $@ java/src/native/FEASTJNIUtil.c java/src/native/FEASTJNI.c java/src/native/WeightedFEASTJNI.c -lm -lMIToolbox -lFSToolbox
 
 .PHONY : debug x86 x64 intel clean install
@@ -68,13 +73,18 @@ x86:
 x64:
 	$(MAKE) libFSToolbox.so "CXXFLAGS = -O3 -fPIC -m64"
 
+x64_win:
+	$(MAKE) libFSToolbox.dll "CFLAGS = -O3 -m64"
+
 intel:
 	$(MAKE) libFSToolbox.so "COMPILER = icc" "LINKER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
 
 clean:
 	-rm -fr build
+	-rm -f java/src/main/resources/libfeast-java.so
 	-rm -f matlab/*.o matlab/*.mex*
 	-rm -f libFSToolbox.so
+	-rm -f libFSToolbox.dll
 
 install:
 	$(MAKE)

@@ -9,9 +9,9 @@
 **           18/12/2016 - Added an output variable for the feature scores.
 **
 ** Part of the FEAture Selection Toolbox (FEAST), please reference
-** "Information Theoretic Feature Selection for Cost-Sensitive Problems"
-** A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown
-** ArXiv, 2017
+** "Feature Selection via Joint Likelihood"
+** A. Pocock
+** University of Manchester, 2012
 **
 ** Please check www.github.com/Craigacp/FEAST for updates.
 ** 

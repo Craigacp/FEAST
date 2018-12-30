@@ -23,4 +23,9 @@
 
 # Editor backups
 *~
+
+# Java binaries
 /java/target/
+
+# Build folder
+/build/

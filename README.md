@@ -16,12 +16,12 @@ and our results are presented in the following paper:
  Journal of Machine Learning Research, 13:27-66 (2012)
 ```
 
-The weighted feature selection algorithms are described in:
+The weighted feature selection algorithms are described in Chapter 7 of:
 
 ```
- Information Theoretic Feature Selection for Cost-Sensitive Problems
- A. Pocock, N. Edakunni, M.-J. Zhao, M. Lujan, G. Brown.
- ArXiv
+ Feature Selection via Joint Likelihood
+ A. Pocock
+ PhD Thesis, University of Manchester, 2012
 ```
 
 If you use these implementations for academic research please cite the relevant paper
@@ -104,8 +104,19 @@ feature selection iterates over columns rather than rows, unlike most other ML
 processes. 
 
 Compilation instructions:
- - MATLAB/OCTAVE - run CompileFEAST.m
- - Linux C shared library - use the included makefile
+ - MATLAB/OCTAVE 
+    - run `CompileFEAST.m` in the `matlab` folder.
+ - Linux C shared library 
+    - run `make x86` or `make x64` for a 32-bit or 64-bit library.
+ - Windows C dll (expects pre built libMIToolbox.dll)
+	- install MinGW from https://sourceforge.net/projects/mingw-w64/
+	- add MinGW binaries folders to PATH, e.g. mingw/bin, mingw/msys/bin 
+	- run `make x64_win`.
+ - Java (requires Java 8)
+    - run `make x64`, `sudo make install` to build and install the C library.
+    - then `make java` to build the JNI wrapper.
+    - then run `mvn package` in the `java` directory to build the jar file.
+    - Note: the Java code should work on all platforms and future versions of Java, but the included Makefile only works on Ubuntu & Java 8.
 
 Update History
  - 07/01/2017 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability. FEAST functions now return the internal scores assigned by each criteria as well. Added a Java API via JNI. FEAST v2 is approximately 30% faster when called from Matlab.
