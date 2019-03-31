@@ -11,31 +11,30 @@ import ctypes as c
 
 
 class weightedCMIM():
-    """ Class for weightedCMIM features selection
-        based on C implementation in Feature Selection Tools box
-        https://github.com/Craigacp/FEAST
+    """
+    Python wrapper for weightedCMIM feature selection
 
-        Parameters
-        ----------
-        num_of_features : integer, default = 20
-            the amount of features to choose
-		weights			: list
-			list of samples weights
+    Parameters
+    ----------
+    num_of_features : integer, default = 20
+        the amount of features to choose
+    	weights			: list
+    		list of samples weights
 
-        Attributes
-        ----------
-		num_of_features	: integer
-			Number of features to select
-		weight_vector	: list of floats
-			Samples weights
-        feature_indexes	: list of floats
-            Indexes of selected feature
-        feature_scores	: list of floats
-            Scores of selected feature. The score is calculated by min{I(Xn ; Y | Xk)}
-		feature_names	: list of strings
-            Names of the selected features
-            * will be available only in case data for fit is pandas DataFrame
-        """
+    Attributes
+    ----------
+    	num_of_features	: integer
+    		Number of features to select
+    	weight_vector	: list of floats
+    		Samples weights
+    feature_indexes	: list of floats
+        Indexes of selected feature
+    feature_scores	: list of floats
+        Scores of selected feature. The score is calculated by min{I(Xn ; Y | Xk)}
+    	feature_names	: list of strings
+        Names of the selected features
+        * will be available only in case data for fit is pandas DataFrame
+    """
 
     def __init__(self, num_of_features=20, weights):
         if sys.platform.startswith('linux'):
@@ -49,7 +48,7 @@ class weightedCMIM():
             raise NotImplementedError('FeastCMIM is not supported on {} operating system'.format(sys.platform))
 
         self.num_of_features = num_of_features
-		self.weight_vector = weights
+        self.weight_vector = weights
         self.feature_indexes = None
         self.feature_scores = None
         self.feature_names = None		

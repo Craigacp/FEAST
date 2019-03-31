@@ -11,25 +11,24 @@ import ctypes as c
 
 
 class CMIM():
-    """ Class for CMIM features selection
-        based on C implementation in Feature Selection Tools box
-        https://github.com/Craigacp/FEAST
+    """ 
+    Python wrapper for CMIM feature selection
 
-        Parameters
-        ----------
-        num_of_features : integer, default = 20
-            the amount of features to choose.
+    Parameters
+    ----------
+    num_of_features : integer, default = 20
+        the amount of features to choose.
 
-        Attributes
-        ----------
-        feature_names : list of strings
-            Names of the selected features.
-            * will be available only in case data for fit is pandas DataFrame
-        feature_scores : list of floats
-            Scores of selected feature. The score is calculated by min{I(Xn ; Y | Xk)}
-        feature_indexes : list of floats
-            Indexes of selected feature.
-        """
+    Attributes
+    ----------
+    feature_names : list of strings
+        Names of the selected features.
+        * will be available only in case data for fit is pandas DataFrame
+    feature_scores : list of floats
+        Scores of selected feature. The score is calculated by min{I(Xn ; Y | Xk)}
+    feature_indexes : list of floats
+        Indexes of selected feature.
+    """
 
     def __init__(self, num_of_features=20):
         if sys.platform.startswith('linux'):

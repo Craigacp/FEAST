@@ -29,3 +29,6 @@
 
 # Build folder
 /build/
+
+# IDE files
+.idea

@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.datasets import load_boston
 from sklearn.preprocessing import MinMaxScaler
-from CMIM import CMIM
+from feast.CMIM import CMIM
 
 class TestCMIM(unittest.TestCase):
 
