@@ -1,14 +1,14 @@
 FEAST
 =====
 
-A FEAture Selection Toolbox for C/C++ &amp; MATLAB/OCTAVE, v2.0.0.
+A FEAture Selection Toolbox for C/C++, Java, Python, &amp; MATLAB/Octave, v2.1.0.
 
 FEAST provides implementations of common mutual information based filter
-feature selection algorithms, and an implementation of RELIEF. All functions
-expect discrete inputs (except RELIEF, which does not depend on the MIToolbox),
-and they return the selected feature indices. These implementations were
-developed to help our research into the similarities between these algorithms,
-and our results are presented in the following paper:
+feature selection algorithms, and an implementation of RELIEF for Matlab. All
+functions expect discrete inputs (except RELIEF, which does not depend on the
+MIToolbox), and they return the selected feature indices. These implementations
+were developed to help our research into the similarities between these
+algorithms, and our results are presented in the following paper:
 
 ```
  Conditional Likelihood Maximisation: A Unifying Framework for Information Theoretic Feature Selection
@@ -90,13 +90,9 @@ selectedIndices =
 The library is written in ANSI C for compatibility with the MATLAB mex
 compiler, except for MIM, FCBF and RELIEF, which are written in MATLAB/OCTAVE
 script. There is a different implementation of MIM available for use in the C
-library.
+library. It depends on MIToolbox which is incorporated as a git submodule.
 
-MIToolbox v3.0.0 is required to compile these algorithms, and these
-implementations supercede the example implementations given in that package
-(they have more robust behaviour when used with unexpected inputs).
-
-MIToolbox can be found at: http://www.github.com/Craigacp/MIToolbox/
+MIToolbox is developed on [GitHub](http://www.github.com/Craigacp/MIToolbox/).
 
 The C library expects all matrices in column-major format (i.e. Fortran style).
 This is for two reasons, a) MATLAB generates Fortran-style arrays, and b)
@@ -104,6 +100,7 @@ feature selection iterates over columns rather than rows, unlike most other ML
 processes. 
 
 Compilation instructions:
+Run `git submodule init` then,
  - MATLAB/OCTAVE 
     - run `CompileFEAST.m` in the `matlab` folder.
  - Linux C shared library 
@@ -117,8 +114,11 @@ Compilation instructions:
     - then `make java` to build the JNI wrapper.
     - then run `mvn package` in the `java` directory to build the jar file.
     - Note: the Java code should work on all platforms and future versions of Java, but the included Makefile only works on Ubuntu & Java 8.
+ - Python
+    - run `python setup.py` in the `python` folder.
 
 Update History
+ - xx/xx/xxxx - v2.1.0 - Added a python API and refactored the package structure.
  - 07/01/2017 - v2.0.0 - Added weighted feature selection, major refactoring of the code to improve speed and portability. FEAST functions now return the internal scores assigned by each criteria as well. Added a Java API via JNI. FEAST v2 is approximately 30% faster when called from Matlab.
  - 12/03/2016 - v1.1.4 - Fixed an issue where Matlab would segfault if all features had zero MI with the label.
  - 12/10/2014 - v1.1.2 - Updated documentation to note that FEAST expects column-major matrices.

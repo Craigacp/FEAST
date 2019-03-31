@@ -40,17 +40,24 @@ PREFIX = /usr/local
 CFLAGS = -O3 -fPIC -std=c89 -pedantic -Wall -Werror
 CC = gcc
 LINKER = gcc
-INCLUDES = -I../MIToolbox/include -Iinclude
-LIBS = -L../MIToolbox
+INCLUDES = -IMIToolbox/include -Iinclude
 JNI_INCLUDES = -I/usr/lib/jvm/java-8-openjdk-amd64/include/ -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
 JAVA_INCLUDES = -Ijava/native/include
 objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.o build/JMI.o build/MIM.o build/mRMR_D.o build/WeightedCMIM.o build/WeightedCondMI.o build/WeightedDISR.o build/WeightedJMI.o build/WeightedMIM.o
 
-libFSToolbox.so : $(objects)
+libFSToolbox.so : libMIToolbox.so $(objects)
 	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
 
-libFSToolbox.dll : $(objects)
-	$(LINKER) -shared -o libFSToolbox.dll $(objects) $(LIBS) -lm -lMIToolbox
+libFSToolbox.dll : libMIToolbox.dll $(objects)
+	$(LINKER) -shared -o libFSToolbox.dll $(objects) -lm -lMIToolbox
+
+libMIToolbox.so :
+	$(MAKE) -C MIToolbox
+	-cp MIToolbox/libMIToolbox.so .
+
+libMIToolbox.dll :
+	$(MAKE) -C MIToolbox x64_win
+	-cp MIToolbox/libMIToolbox.dll .
 
 build/%.o: src/%.c 
 	@mkdir -p build
@@ -80,14 +87,18 @@ intel:
 	$(MAKE) libFSToolbox.so "COMPILER = icc" "LINKER = icc" "CXXFLAGS = -O2 -fPIC -xHost"
 
 clean:
+	$(MAKE) -C MIToolbox clean
 	-rm -fr build
 	-rm -f java/src/main/resources/libfeast-java.so
 	-rm -f matlab/*.o matlab/*.mex*
+	-rm -f libMIToolbox.so
+	-rm -f libMIToolbox.dll
 	-rm -f libFSToolbox.so
 	-rm -f libFSToolbox.dll
 
 install:
 	$(MAKE)
+	$(MAKE) -C MIToolbox install
 	@echo "Installing FEAST's libFSToolbox.so to $(PREFIX)/lib"
 	@cp -v libFSToolbox.so $(PREFIX)/lib
 	@echo "Installing FEAST's header files to $(PREFIX)/include/FEAST"
