@@ -94,11 +94,13 @@ class mRMR_D(FeastFunc):
     def __init__(self):
 	super().__init__(False)
 
+        
 class disc_mRMR_D(FeastFunc):
 	
     def __init__(self):
 	super().__init__(True)	
 
+        
 class CMIM(FeastFunc):
     """
     CMIM() implements a discrete version of the 
@@ -111,158 +113,171 @@ class CMIM(FeastFunc):
     def __init__(self):
         super().__init__(False)
 
+        
 class discCMIM(FeastFunc):
 
     def __init__(self):
         super().__init__(True)
 
         
-#*******************************************************************************
-#** JMI() implements the JMI criterion from
-#**
-#** "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
-#** H. Yang and J. Moody, NIPS (1999)
-#*******************************************************************************
-JMI = fstoolbox_lib.JMI
-JMI.restype = POINTER(c_uint)
-JMI.argtypes = __non_discretized_argtypes
+class JMI(FeastFunc):        
+    """
+    JMI() implements the JMI criterion from
+    "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
+    H. Yang and J. Moody, NIPS (1999)
+    """
 
-discJMI = fstoolbox_lib.discJMI
-discJMI.restype = POINTER(c_double)
-discJMI.argtypes = __discretized_argtypes
+    def __init__setl):
+        super().__init__(False)
 
-#*******************************************************************************
-#** DISR() implements the Double Input Symmetrical Relevance criterion
-#** from
-#** 
-#** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
-#** P. Meyer and G. Bontempi, (2006)
-#*******************************************************************************
-DISR = fstoolbox_lib.DISR
-DISR.restype = POINTER(c_uint)
-DISR.argtypes = __non_discretized_argtypes
+        
+class discJMI(FeastFunc):
 
-discDISR = fstoolbox_lib.discDISR
-discDISR.restype = POINTER(c_double)
-discDISR.argtypes = __discretized_argtypes
+    def __init__(self):
+        super().__init__(True)
 
-#*******************************************************************************
-#** ICAP() implements the Interaction Capping criterion from 
-#** 
-#** "Machine Learning Based on Attribute Interactions"
-#** A. Jakulin, PhD Thesis (2005)
-#*******************************************************************************
-ICAP = fstoolbox_lib.ICAP
-ICAP.restype = POINTER(c_uint)
-ICAP.argtypes = __non_discretized_argtypes
+        
+class DISR(FeastFunc):
+    """
+    DISR() implements the Double Input Symmetrical Relevance criterion
+    from
+    "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
+    P. Meyer and G. Bontempi, (2006)
+    """
+    def __init__(self):
+        super().__init__(False)
 
-discICAP = fstoolbox_lib.discICAP
-discICAP.restype = POINTER(c_double)
-discICAP.argtypes = __discretized_argtypes
+        
+class discDISR(FeatFunc):
+    def __init__(self):
+        super().__init__(True)
 
-#*******************************************************************************
-#** CondMI() implements the CMI criterion using a greedy forward search
-#**
-#** It returns an int array, not a uint array, as -1 is a sentinel value 
-#** signifying there was not enough information to select a feature.
-#*******************************************************************************
-CondMI = fstoolbox_lib.CondMI
-CondMI.restype = POINTER(c_uint)
-CondMI.argtypes = __non_discretized_argtypes
 
-CondMIICAP = fstoolbox_lib.discCondMI
-CondMIICAP.restype = POINTER(c_double)
-CondMIICAP.argtypes = __discretized_argtypes
+class ICAP(FeastFunc):        
+    """
+    ICAP() implements the Interaction Capping criterion from 
+    "Machine Learning Based on Attribute Interactions"
+    A. Jakulin, PhD Thesis (2005)
+    """
+    def __init__(self):
+        super().__init__(False)
 
-#*******************************************************************************
-#** MIM() implements the MIM criterion using a greedy forward search
-#*******************************************************************************
-MIM = fstoolbox_lib.MIM
-MIM.restype = POINTER(c_uint)
-MIM.argtypes = __non_discretized_argtypes
+        
+class discICAP(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
 
-discMIM = fstoolbox_lib.discMIM
-discMIM.restype = POINTER(c_double)
-discMIM.argtypes = __discretized_argtypes
+        
+def CondMI(FeastFunc):
+    """
+    CondMI() implements the CMI criterion using a greedy forward search
+    It returns an int array, not a uint array, as -1 is a sentinel value 
+    signifying there was not enough information to select a feature.
+    """
+    def __init__(self):
+        super().__init__(False)
 
-#*******************************************************************************
-#** betaGamma() implements the Beta-Gamma space from Brown (2009).
-#** This incoporates MIFS, CIFE, and CondRed.
-#**
-#** MIFS - "Using mutual information for selecting features in supervised neural net learning"
-#** R. Battiti, IEEE Transactions on Neural Networks, 1994
-#**
-#** CIFE - "Conditional Infomax Learning: An Integrated Framework for Feature Extraction and Fusion"
-#** D. Lin and X. Tang, European Conference on Computer Vision (2006)
-#**
-#** The Beta Gamma space is explained in our paper 
-#** "Conditional Likelihood Maximisation: A Unifying Framework for Mutual Information Feature Selection"
-#** G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
-#** Journal of Machine Learning Research (JMLR), 2011
-#*******************************************************************************/
-BetaGamma = fstoolbox_lib.BetaGamma
-BetaGamma.restype = POINTER(c_uint)
-BetaGamma.argtypes = __non_discretized_argtypes
+        
+class CondMIICAP(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
 
-discBetaGamma = fstoolbox_lib.discBetaGamma
-discBetaGamma.restype = POINTER(c_double)
-discBetaGamma.argtypes = __discretized_argtypes
+        
+class MIM(FeastFunc):
+    """
+    MIM() implements the MIM criterion using a greedy forward search
+    """
+    def __init__(self):
+        super().__init__(False)
 
-#*******************************************************************************
-#** weightedCMIM() implements a discrete version of the 
-#** Conditional Mutual Information Maximisation criterion, using the fast
-#** exact implementation from
-#**
-#** "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
-#** F. Fleuret, JMLR (2004)
-#*******************************************************************************
-weightedCMIM = fstoolbox_lib.weightedCMIM
-weightedCMIM.restype = POINTER(c_uint)
-weightedCMIM.argtypes = __non_discretized_argtypes
+        
+class discMIM(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
 
-discWeightedCMIM = fstoolbox_lib.discWeightedCMIM
-discWeightedCMIM.restype = POINTER(c_double)
-discWeightedCMIM.argtypes = __discretized_argtypes
+        
+class BetaGamma(FeastFunc):
+    """
+    betaGamma() implements the Beta-Gamma space from Brown (2009).
+    This incoporates MIFS, CIFE, and CondRed.
+    MIFS - "Using mutual information for selecting features in supervised neural net learning"
+    
+    R. Battiti, IEEE Transactions on Neural Networks, 1994
+    CIFE - "Conditional Infomax Learning: An Integrated Framework for Feature Extraction and Fusion"
+    D. Lin and X. Tang, European Conference on Computer Vision (2006)
+    
+    The Beta Gamma space is explained in our paper 
+    "Conditional Likelihood Maximisation: A Unifying Framework for Mutual Information Feature Selection"
+    G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
+    Journal of Machine Learning Research (JMLR), 2011
+    """
+    def __init__(self):
+        super().__init__(False)
 
-#*******************************************************************************
-#** WeightedJMI() implements the JMI criterion from
-#**
-#** "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
-#** H. Yang and J. Moody, NIPS (1999)
-#*******************************************************************************
-weightedJMI = fstoolbox_lib.weightedJMI
-weightedJMI.restype = POINTER(c_uint)
-weightedJMI.argtypes = __non_discretized_argtypes
 
-discWeightedJMI = fstoolbox_lib.discWeightedJMI
-discWeightedJMI.restype = POINTER(c_double)
-discWeightedJMI.argtypes = __discretized_argtypes
+class discBetaGamma(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
 
-#*******************************************************************************
-#** weightedDISR() implements the Double Input Symmetrical Relevance criterion
-#** from
-#** 
-#** "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
-#** P. Meyer and G. Bontempi, (2006)
-#*******************************************************************************
-weightedDISR = fstoolbox_lib.weightedDISR
-weightedDISR.restype = POINTER(c_uint)
-weightedDISR.argtypes = __non_discretized_argtypes
 
-discWeightedDISR = fstoolbox_lib.discWeightedDISR
-discWeightedDISR.restype = POINTER(c_double)
-discWeightedDISR.argtypes = __discretized_argtypes
+class weightedCMIM(FeastFunc):
+    """
+    weightedCMIM() implements a discrete version of the 
+    Conditional Mutual Information Maximisation criterion, using the fast
+    exact implementation from
+    "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
+    F. Fleuret, JMLR (2004)
+    """
+    def __init__(self):
+        super().__init__(False)
 
-#*******************************************************************************
-#** weightedCondMI() implements the CMI criterion using a greedy forward search
-#**
-#** It returns an int array, not a uint array, as -1 is a sentinel value signifying
-#** there was not enough information to select a feature.
-#*******************************************************************************
-weightedCondMI = fstoolbox_lib.weightedCondMI
-weightedCondMI.restype = POINTER(c_uint)
-weightedCondMI.argtypes = __non_discretized_argtypes
+        
+class discWeightedCMIM(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
 
-discWeightedCondMI = fstoolbox_lib.discWeightedCondMI
-discWeightedCondMI.restype = POINTER(c_double)
-discWeightedCondMI.argtypes = __discretized_argtypes
+        
+class weightedJMI(FeastFunc):
+    """
+    WeightedJMI() implements the JMI criterion from
+    "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
+    H. Yang and J. Moody, NIPS (1999)
+    """
+    def __init__(self)
+        super().__init__(False)
+
+        
+class discWeightedJMI(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
+
+
+class weightedDISR(FeastFunc):
+    """
+    weightedDISR() implements the Double Input Symmetrical Relevance criterion
+    from
+    "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
+    P. Meyer and G. Bontempi, (2006)
+    """
+    def __init__(self):
+        super().__init__(False)
+
+
+class discWeightedDISR(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
+
+
+class weightedCondMI(FeastFunc):
+    """
+    weightedCondMI() implements the CMI criterion using a greedy forward search
+    It returns an int array, not a uint array, as -1 is a sentinel value signifying
+    there was not enough information to select a feature.
+    """
+    def __init__(self):
+        super().__init__(False)
+
+
+class discWeightedCondMI(FeastFunc):
+    def __init__(self):
+        super().__init__(True)
