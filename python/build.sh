@@ -44,27 +44,28 @@ fi
 
 if [[ -z "${LD_LIBRARY_PATH}" ]] ; then
     # These were more than likely added to /usr/local/lib
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib;    
+    echo "export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib" >> $HOME/.bashrc
 else
     if [[ ":$LD_LIBRARY_PATH:" == *":/lib:"* ]] ; then
 	echo "[DEBUG] /lib is already part of LD_LIBRARY_PATH"
     else
-	export LD_LIBRARY_PATH=/lib:$LD_LIBRARY_PATH
+	echo "export LD_LIBRARY_PATH=/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 
     if [[ ":$LD_LIBRARY_PATH:" == *":/usr/lib:"* ]] ; then
 	echo "[DEBUG] /usr/lib is already part of LD_LIBRARY_PATH"
     else
-	export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+	echo "export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 
     if [[ ":$LD_LIBRARY_PATH:" == *":/usr/local/lib:"* ]] ; then
 	echo "[DEBUG] /usr/local/lib is already part of LD_LIBRARY_PATH"
     else
-	export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+	echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 fi
 
+source $HOME/.bashrc
 
 # build the python data !
 cd $original_dir;

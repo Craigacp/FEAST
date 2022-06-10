@@ -1,478 +1,261 @@
-Afrom ctypes import cdll, POINTER, c_uint32, c_double
+from ctypes import cdll, POINTER, c_uint, c_double
 import inspect
+from typing import List
+from numpy import ndarray, array, zeros
 
+import numpy as np
+from numpy.ctypeslib import ndpointer
 
 # load the library
 fstoolbox_lib = cdll.LoadLibrary("libFSToolbox.so")
 
+_uintpp = ndpointer(dtype=np.uintp, ndim=1, flags='F')
+_doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
-def handle_params(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-):
-    """
-    Convert all parameters from python types to the C types. The function is used 
-    to handle parameters for nondiscretized functions.
+# Set the expected argtypes and return types for library functions
+fstoolbox_lib.BetaGamma.argtypes = [c_uint, c_uint, c_uint, _uintpp, POINTER(c_uint), POINTER(c_uint), POINTER(c_double), c_double, c_double]
+fstoolbox_lib.BetaGamma.restype = POINTER(c_uint)
+fstoolbox_lib.discBetaGamma.argtypes = [c_uint, c_uint, c_uint, _doublepp, POINTER(c_double), POINTER(c_double), POINTER(c_double), c_double, c_double]
+fstoolbox_lib.discBetaGamma.restype = POINTER(c_double)
+fstoolbox_lib.CMIM.argtypes = [c_uint, c_uint, c_uint, _uintpp, POINTER(c_uint), POINTER(c_uint), POINTER(c_double)]
+fstoolbox_lib.CMIM.restype = POINTER(c_uint)
+fstoolbox_lib.discCMIM.argtypes = [c_uint, c_uint, c_uint, _doublepp, POINTER(c_double), POINTER(c_double), POINTER(c_double)]
+fstoolbox_lib.discCMIM.restype = POINTER(c_double)
 
-    For more information see `_internal_lib_call()` for the usage and list of parameters
 
-    :return: A tuple containing the convert c-type version of the paramters provided
-    """
-    _k = c_uint32(k)
-    _numOfSamples = c_uint32(numOfSamples)
-    _numOfFeatures = c_uint32(numOfFeatures)
-
-    twod_fm = (c_uint32 * len(featureMatrix[0])) * len(featureMatrix)
-    _featureMatrix = twod_fm()
-    for i in range(len(featureMatrix)):
-        _featureMatrix[i] = (c_uint32 * len(featureMatrix[i]))(*featureMatrix[i])
+def BetaGamma(data_set, labels, num_features_to_select, beta, gamma):
+    '''Python implementation of the FEAST::BetaGamma Selection Algorithm.
+    See `https://github.com/Craigacp/FEAST/blob/master/src/BetaGamma.c` for more
+    information.
     
-    _classColumn = (c_uint32 * len(classColumn))(*classColumn)
-
-    if discretized:
-        _outputFeatures = (c_double * len(outputFeatures))(*outputFeatures)
-    else:
-        _outputFeatures = (c_uint32 * len(outputFeatures))(*outputFeatures)
-        
-    _featureScores = (c_uint32 * len(featureScores))(*featureScores)
+    :param data_set: ND Array where len() == number of observations and len(transpose()) ==
+    number of features
+    :param labels: ND Array where len() == number of observations. The length of labels
+    sould be equal to the length of the `data_set`
+    :param num_features_to_select: Number of features to select. The value must be less than
+    or equal to the length of the `data_set`
+    :param beta: Penalty attached to I(X_j;X_k); Value between 0.0 and 1.0 
+    :param gamma: Positive weight attached to I(X_k;X_j|Y); Value between 0.0 and 1.0 
+    :return: `num_features_to_select` Features in order that they were selected
+    '''
+    _data_set = np.array(data_set, dtype=np.uint32, order="F")
+    _labels = np.array(labels, dtype=np.uint32)
     
-    return _k, _numOfSamples, _numOfFeatures, _featureMatrix, _classColumn, _outputFeatures, _featureScores
+    num_observations, num_features = _data_set.shape
+    output = zeros(num_features_to_select).astype(np.uint)
+    selected_features_scores = zeros(num_features)
 
-
-def _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featuresScores,
-        discretized=False
-):
-    """
+    # convert/create the types to C-Types
+    c_num_features_to_select = c_uint(num_features_to_select)
+    c_num_observations = c_uint(num_observations)
+    c_num_features = c_uint(num_features)    
+    c_output_features = output.ctypes.data_as(POINTER(c_uint))
+    c_beta = c_double(beta)
+    c_gamma = c_double(gamma)
     
-    :param k (python: `int`, c: `uint`):
-    :param numOfSamples (python: `int`, c: `uint`):
-    :param numOfFeatures (python: `int`, c: `uint`):
-    :param featureMatrix (python: `list(list(int))`, c: `**uint`):
-    :param classColumn (python: `list(int)`, c: `*uint`):
-    :param outputFeatures (python: `list(int)`, c: `*uint`):
-    :param featureScores (python: `list(double)`, c: `*double`):
+    # filled in feature scores through the library
+    selected_features_scores = zeros(num_features)
+    c_selected_feature_types = selected_features_scores.ctypes.data_as(POINTER(c_double))
     
-    :param discretized [default=`False`]: 
+    # convert the parameters to the C-Type variables expected
+    c_labels = _labels.ctypes.data_as(POINTER(c_uint))
+    c_feature_matrix = (_data_set.__array_interface__['data'][0] + np.arange(_data_set.shape[1]) * (_data_set.strides[1])).astype(np.uintp)
     
-    :return:
-    """
-
-    # get the name of the calling function which will determine the function name
-    # from libfstoolbox to use. THIS MUST MATCH or it will fail
-    # [1] -> call stack where [0] is the current function
-    # [3] -> index where the function name is stored    
-    internal_function = getattr(fstoolbox_lib, inspect.stack()[1][3], None)
-    if callable(internal_function):
-        converted_c_types = handle_params(
-            k,
-            numOfSamples,
-            numOfFeatures,
-            featureMatrix,
-            classColumn,
-            outputFeatures,
-            featureScores,
-            discretized=discretized
-        )
-        
-        c_type_ret = internal_function(*converted_c_types)
-
-        # convert the type back to its python type - list (pointer or array of uints)
-        pytype_ret = [c_type_ret[i] for i in range(len(c_type_ret))]
-        return pytype_ret
-
-def CMIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    CMIM() implements a discrete version of the 
-    Conditional Mutual Information Maximisation criterion, using the fast
-    exact implementation from
-
-    "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
-    F. Fleuret, JMLR (2004)
-
-    See `_internal_lib_call()` for more information.
-
-    :return:
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
+    features = fstoolbox_lib.BetaGamma(
+        c_num_features_to_select,
+        c_num_observations,
+        c_num_features, 
+        c_feature_matrix,
+        c_labels,
+        c_output_features,
+        c_selected_feature_types,
+        c_beta,
+        c_gamma
     )
 
+    # result transition from C to Python
+    features_iterator = np.fromiter(features, dtype=np.uint, count=num_features_to_select)
+    selected_features = []
+    for c_selected_feature_index in features_iterator:
+        selected_features.append(c_selected_feature_index)
 
-def discCMIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
+    # store the selection results
+    feature_scores = [c_selected_feature_types[idx] for idx in range(num_features_to_select)]
+
+    return selected_features, feature_scores
 
 
-def JMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    JMI() implements the JMI criterion from
-    "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
-    H. Yang and J. Moody, NIPS (1999)
+def discBetaGamma(data_set, labels, num_features_to_select, beta, gamma):
+    '''Python implementation of the FEAST::discBetaGamma Selection Algorithm.
+    See `https://github.com/Craigacp/FEAST/blob/master/src/BetaGamma.c` for more
+    information.
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discJMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def DISR(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    DISR() implements the Double Input Symmetrical Relevance criterion from
-    "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
-    P. Meyer and G. Bontempi, (2006)
+    :param data_set: ND Array where len() == number of observations and len(transpose()) ==
+    number of features
+    :param labels: ND Array where len() == number of observations. The length of labels
+    sould be equal to the length of the `data_set`
+    :param num_features_to_select: Number of features to select. The value must be less than
+    or equal to the length of the `data_set`
+    :param beta: Penalty attached to I(X_j;X_k); Value between 0.0 and 1.0 
+    :param gamma: Positive weight attached to I(X_k;X_j|Y); Value between 0.0 and 1.0 
+    :return: `num_features_to_select` Features in order that they were selected
+    '''
+    _data_set = np.array(data_set, dtype=np.uint32, order="C")
+    _labels = np.array(labels, dtype=np.uint32)
     
-    See `_internal_lib_call()` for more information.
+    num_observations, num_features = _data_set.shape
+    output = zeros(num_features_to_select).astype(np.uint)
+    selected_features_scores = zeros(num_features)
 
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discDISR(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def ICAP(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    ICAP() implements the Interaction Capping criterion from 
-    "Machine Learning Based on Attribute Interactions"
-    A. Jakulin, PhD Thesis (2005)
+    # convert/create the types to C-Types
+    c_num_features_to_select = c_uint(num_features_to_select)
+    c_num_observations = c_uint(num_observations)
+    c_num_features = c_uint(num_features)    
+    c_output_features = output.ctypes.data_as(POINTER(c_double))
+    c_beta = c_double(beta)
+    c_gamma = c_double(gamma)
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discICAP(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def CondMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    CondMI() implements the CMI criterion using a greedy forward search
-    It returns an int array, not a uint array, as -1 is a sentinel value 
-    signifying there was not enough information to select a feature.
+    # filled in feature scores through the library
+    selected_features_scores = zeros(num_features)
+    c_selected_feature_types = selected_features_scores.ctypes.data_as(POINTER(c_double))
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discCondMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def MIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    MIM() implements the MIM criterion using a greedy forward search
+    # convert the parameters to the C-Type variables expected
+    c_labels = _labels.ctypes.data_as(POINTER(c_double))
+    c_feature_matrix = (_data_set.__array_interface__['data'][0] + np.arange(_data_set.shape[0]) * (_data_set.strides[0])).astype(np.uintp)
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
+    features = fstoolbox_lib.discBetaGamma(
+        c_num_features_to_select,
+        c_num_observations,
+        c_num_features, 
+        c_feature_matrix,
+        c_labels,
+        c_output_features,
+        c_selected_feature_types,
+        c_beta,
+        c_gamma
     )
 
+    # result transition from C to Python
+    features_iterator = np.fromiter(features, dtype=np.uint, count=num_features_to_select)
+    selected_features = []
+    for c_selected_feature_index in features_iterator:
+        selected_features.append(c_selected_feature_index)
 
-def discMIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
+    # store the selection results
+    feature_scores = [c_selected_feature_types[idx] for idx in range(num_features_to_select)]
+
+    return selected_features, feature_scores
 
 
-def BetaGamma(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    betaGamma() implements the Beta-Gamma space from Brown (2009).
-    This incoporates MIFS, CIFE, and CondRed.
-    MIFS - "Using mutual information for selecting features in supervised neural net learning"
-    R. Battiti, IEEE Transactions on Neural Networks, 1994
-    CIFE - "Conditional Infomax Learning: An Integrated Framework for Feature Extraction and Fusion"
-    D. Lin and X. Tang, European Conference on Computer Vision (2006)
-    The Beta Gamma space is explained in our paper 
-    "Conditional Likelihood Maximisation: A Unifying Framework for Mutual Information Feature Selection"
-    G. Brown, A. Pocock, M.-J. Zhao, M. Lujan
-    Journal of Machine Learning Research (JMLR), 2011
+def CMIM(data_set, labels, num_features_to_select):
+    '''Python implementation of the FEAST::CMIM Selection Algorithm.
+    See `https://github.com/Craigacp/FEAST/blob/master/src/CMIM.c` for more
+    information.
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discBetaGamma(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def weightedCMIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    weightedCMIM() implements a discrete version of the 
-    Conditional Mutual Information Maximisation criterion, using the fast
-    exact implementation from
-    "Fast Binary Feature Selection using Conditional Mutual Information Maximisation"
-    F. Fleuret, JMLR (2004)
+    :param data_set: ND Array where len() == number of observations and len(transpose()) ==
+    number of features
+    :param labels: ND Array where len() == number of observations. The length of labels
+    sould be equal to the length of the `data_set`
+    :param num_features_to_select: Number of features to select. The value must be less than
+    or equal to the length of the `data_set`
+    :return: `num_features_to_select` Features in order that they were selected
+    '''
+    _data_set = np.array(data_set, dtype=np.uint32, order="F")
+    _labels = np.array(labels, dtype=np.uint32)
     
-    See `_internal_lib_call()` for more information.
+    num_observations, num_features = _data_set.shape
+    output = zeros(num_features_to_select).astype(np.uint)
+    selected_features_scores = zeros(num_features)
 
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discWeightedCMIM(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def weightedJMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    WeightedJMI() implements the JMI criterion from
-    "Data Visualization and Feature Selection: New Algorithms for Nongaussian Data"
-    H. Yang and J. Moody, NIPS (1999)
+    # convert/create the types to C-Types
+    c_num_features_to_select = c_uint(num_features_to_select)
+    c_num_observations = c_uint(num_observations)
+    c_num_features = c_uint(num_features)    
+    c_output_features = output.ctypes.data_as(POINTER(c_uint))
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discWeightedJMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def weightedDISR(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    weightedDISR() implements the Double Input Symmetrical Relevance criterion from
-    "On the Use of Variable Complementarity for Feature Selection in Cancer Classification"
-    P. Meyer and G. Bontempi, (2006)
+    # filled in feature scores through the library
+    selected_features_scores = zeros(num_features)
+    c_selected_feature_types = selected_features_scores.ctypes.data_as(POINTER(c_double))
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
-    )
-
-
-def discWeightedDISR(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
-    )
-
-
-def weightedCondMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    """
-    weightedCondMI() implements the CMI criterion using a greedy forward search
-    It returns an int array, not a uint array, as -1 is a sentinel value signifying
-    there was not enough information to select a feature.
+    # convert the parameters to the C-Type variables expected
+    c_labels = _labels.ctypes.data_as(POINTER(c_uint))
+    c_feature_matrix = (_data_set.__array_interface__['data'][0] + np.arange(_data_set.shape[1]) * (_data_set.strides[1])).astype(np.uintp)
     
-    See `_internal_lib_call()` for more information.
-
-    """
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=False
+    features = fstoolbox_lib.CMIM(
+        c_num_features_to_select,
+        c_num_observations,
+        c_num_features, 
+        c_feature_matrix,
+        c_labels,
+        c_output_features,
+        c_selected_feature_types
     )
 
+    # result transition from C to Python
+    features_iterator = np.fromiter(features, dtype=np.uint, count=num_features_to_select)
+    selected_features = []
+    for c_selected_feature_index in features_iterator:
+        selected_features.append(c_selected_feature_index)
 
-def discWeightedCondMI(k, numOfSamples, numOfFeatures, featureMatrix, classColumn, outputFeatures, featureScores):
-    return _internal_lib_call(
-        k,
-        numOfSamples,
-        numOfFeatures,
-        featureMatrix,
-        classColumn,
-        outputFeatures,
-        featureScores,
-        discretized=True
+    # store the selection results
+    feature_scores = [c_selected_feature_types[idx] for idx in range(num_features_to_select)]
+
+    return selected_features, feature_scores
+
+
+def discCMIM(data_set, labels, num_features_to_select):
+    '''Python implementation of the FEAST::discCMIM Selection Algorithm.
+    See `https://github.com/Craigacp/FEAST/blob/master/src/CMIM.c` for more
+    information.
+    
+    :param data_set: ND Array where len() == number of observations and len(transpose()) ==
+    number of features
+    :param labels: ND Array where len() == number of observations. The length of labels
+    sould be equal to the length of the `data_set`
+    :param num_features_to_select: Number of features to select. The value must be less than
+    or equal to the length of the `data_set`
+    :return: `num_features_to_select` Features in order that they were selected
+    '''
+    _data_set = np.array(data_set, dtype=np.uint32, order="C")
+    _labels = np.array(labels, dtype=np.uint32)
+    
+    num_observations, num_features = _data_set.shape
+    output = zeros(num_features_to_select).astype(np.uint)
+    selected_features_scores = zeros(num_features)
+
+    # convert/create the types to C-Types
+    c_num_features_to_select = c_uint(num_features_to_select)
+    c_num_observations = c_uint(num_observations)
+    c_num_features = c_uint(num_features)    
+    c_output_features = output.ctypes.data_as(POINTER(c_double))
+    
+    # filled in feature scores through the library
+    selected_features_scores = zeros(num_features)
+    c_selected_feature_types = selected_features_scores.ctypes.data_as(POINTER(c_double))
+    
+    # convert the parameters to the C-Type variables expected
+    c_labels = _labels.ctypes.data_as(POINTER(c_double))
+    c_feature_matrix = (_data_set.__array_interface__['data'][0] + np.arange(_data_set.shape[1]) * (_data_set.strides[1])).astype(np.double)
+    
+    features = fstoolbox_lib.discCMIM(
+        c_num_features_to_select,
+        c_num_observations,
+        c_num_features, 
+        c_feature_matrix,
+        c_labels,
+        c_output_features,
+        c_selected_feature_types
     )
+
+    # result transition from C to Python
+    features_iterator = np.fromiter(features, dtype=np.double, count=num_features_to_select)
+    selected_features = []
+    for c_selected_feature_index in features_iterator:
+        selected_features.append(c_selected_feature_index)
+
+    # store the selection results
+    feature_scores = [c_selected_feature_types[idx] for idx in range(num_features_to_select)]
+
+    return selected_features, feature_scores
+
+
