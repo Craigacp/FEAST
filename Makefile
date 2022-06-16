@@ -45,8 +45,8 @@ JNI_INCLUDES = -I/usr/lib/jvm/java-8-openjdk-amd64/include/ -I/usr/lib/jvm/java-
 JAVA_INCLUDES = -Ijava/native/include
 objects = build/BetaGamma.o build/CMIM.o build/CondMI.o build/DISR.o build/ICAP.o build/JMI.o build/MIM.o build/mRMR_D.o build/WeightedCMIM.o build/WeightedCondMI.o build/WeightedDISR.o build/WeightedJMI.o build/WeightedMIM.o
 
-libFSToolbox.so : libMIToolbox.so $(objects)
-	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) -lm -lMIToolbox
+libFSToolbox.so : $(objects)
+	$(LINKER) $(CFLAGS) -shared -o libFSToolbox.so $(objects) $(LIBS) -lm -lMIToolbox
 
 libFSToolbox.dll : libMIToolbox.dll $(objects)
 	$(LINKER) -shared -o libFSToolbox.dll $(objects) -lm -lMIToolbox
