@@ -71,7 +71,7 @@ source $HOME/.bashrc
 cd $original_dir;
 
 if [ "$me" = "root" ] ; then
-    python3 -m pip install --upgrade;
+    python3 -m pip install . --upgrade;
 else
     echo "[INFO] Running python install as root";
     sudo python3 -m pip install . --upgrade;
