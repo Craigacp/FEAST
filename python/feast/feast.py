@@ -78,7 +78,7 @@ for config in configs:
 
 
 
-def FeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **kwargs):
+def _FeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **kwargs):
     '''Base function for FEAST algorithms. Convert the parameters from the types listed below
     into the types that can be sent to the C/C++ library. 
         
@@ -160,7 +160,7 @@ def FeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **kw
     return selected_features, feature_scores
 
 
-def discFeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **kwargs):
+def _discFeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **kwargs):
     '''Base function for FEAST discretized algorithms. Convert the parameters from the types 
     listed below into the types that can be sent to the C/C++ library. 
         
@@ -241,7 +241,7 @@ def discFeatureSelectionCommon(data_set, labels, num_features_to_select, *args, 
     return selected_features, feature_scores
 
 
-def WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select):
+def _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select):
     '''Base function for FEAST weighted algorithms. Convert the parameters from the types 
     listed below into the types that can be sent to the C/C++ library. 
     
@@ -310,7 +310,7 @@ def WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_se
     return selected_features, feature_scores
 
 
-def discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select):
+def _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select):
     '''Base function for FEAST discretized weighted algorithms. Convert the parameters from the types 
     listed below into the types that can be sent to the C/C++ library. 
     
@@ -384,7 +384,7 @@ def BetaGamma(data_set, labels, num_features_to_select, beta, gamma):
     '''
     c_beta = c_double(beta)
     c_gamma = c_double(gamma)
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select, c_beta, c_gamma)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select, c_beta, c_gamma)
 
 
 def discBetaGamma(data_set, labels, num_features_to_select, beta, gamma):
@@ -394,7 +394,7 @@ def discBetaGamma(data_set, labels, num_features_to_select, beta, gamma):
     '''
     c_beta = c_double(beta)
     c_gamma = c_double(gamma)
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select, c_beta, c_gamma)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select, c_beta, c_gamma)
 
 
 def CMIM(data_set, labels, num_features_to_select):
@@ -402,7 +402,7 @@ def CMIM(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/CMIM.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discCMIM(data_set, labels, num_features_to_select):
@@ -410,7 +410,7 @@ def discCMIM(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/CMIM.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def CondMI(data_set, labels, num_features_to_select):
@@ -418,7 +418,7 @@ def CondMI(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/CondMI.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discCondMI(data_set, labels, num_features_to_select):
@@ -426,7 +426,7 @@ def discCondMI(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/CondMI.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def DISR(data_set, labels, num_features_to_select):
@@ -434,7 +434,7 @@ def DISR(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/DISR.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discDISR(data_set, labels, num_features_to_select):
@@ -442,7 +442,7 @@ def discDISR(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/DISR.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def ICAP(data_set, labels, num_features_to_select):
@@ -450,7 +450,7 @@ def ICAP(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/ICAP.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discICAP(data_set, labels, num_features_to_select):
@@ -458,7 +458,7 @@ def discICAP(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/ICAP.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def JMI(data_set, labels, num_features_to_select):
@@ -466,7 +466,7 @@ def JMI(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/JMI.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discJMI(data_set, labels, num_features_to_select):
@@ -474,7 +474,7 @@ def discJMI(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/JMI.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def MIM(data_set, labels, num_features_to_select):
@@ -482,7 +482,7 @@ def MIM(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/MIM.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def discMIM(data_set, labels, num_features_to_select):
@@ -490,7 +490,7 @@ def discMIM(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/MIM.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def mRMR_D(data_set, labels, num_features_to_select):
@@ -498,7 +498,7 @@ def mRMR_D(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/mRMR_D.c` for more
     information.
     '''
-    return FeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _FeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def disc_mRMR_D(data_set, labels, num_features_to_select):
@@ -506,7 +506,7 @@ def disc_mRMR_D(data_set, labels, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/mRMR_D.c` for more
     information.
     '''
-    return discFeatureSelectionCommon(data_set, labels, num_features_to_select)
+    return _discFeatureSelectionCommon(data_set, labels, num_features_to_select)
 
 
 def weightedCMIM(data_set, labels, weights, num_features_to_select):
@@ -514,7 +514,7 @@ def weightedCMIM(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedCMIM.c` for more
     information.
     '''
-    return WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def discWeightedCMIM(data_set, labels, weights, num_features_to_select):
@@ -522,7 +522,7 @@ def discWeightedCMIM(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedCMIM.c` for more
     information.
     '''
-    return discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def weightedCondMI(data_set, labels, weights, num_features_to_select):
@@ -530,7 +530,7 @@ def weightedCondMI(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedCondMI.c` for more
     information.
     '''
-    return WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def discWeightedCondMI(data_set, labels, weights, num_features_to_select):
@@ -538,7 +538,7 @@ def discWeightedCondMI(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedCondMI.c` for more
     information.
     '''
-    return discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def weightedDISR(data_set, labels, weights, num_features_to_select):
@@ -546,7 +546,7 @@ def weightedDISR(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedDISR.c` for more
     information.
     '''
-    return WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def discWeightedDISR(data_set, labels, weights, num_features_to_select):
@@ -554,7 +554,7 @@ def discWeightedDISR(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedDISR.c` for more
     information.
     '''
-    return discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def weightedJMI(data_set, labels, weights, num_features_to_select):
@@ -562,7 +562,7 @@ def weightedJMI(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedJMI.c` for more
     information.
     '''
-    return WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def discWeightedJMI(data_set, labels, weights, num_features_to_select):
@@ -570,7 +570,7 @@ def discWeightedJMI(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedJMI.c` for more
     information.
     '''
-    return discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def weightedMIM(data_set, labels, weights, num_features_to_select):
@@ -578,7 +578,7 @@ def weightedMIM(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedMIM.c` for more
     information.
     '''
-    return WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
 
 
 def discWeightedMIM(data_set, labels, weights, num_features_to_select):
@@ -586,4 +586,4 @@ def discWeightedMIM(data_set, labels, weights, num_features_to_select):
     See `https://github.com/Craigacp/FEAST/blob/master/src/WeightedMIM.c` for more
     information.
     '''
-    return discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
+    return _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_select)
