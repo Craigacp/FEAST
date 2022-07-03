@@ -32,3 +32,7 @@
 
 # IDE files
 .idea
+
+*.pyo
+*.pyc
+__pycache__/
