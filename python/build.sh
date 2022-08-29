@@ -1,9 +1,14 @@
 # Script to build all of the dependencies from scratch in the event that
 # nothing has been previously established.
+set -eux
+
+function LOG() {
+    echo -e "\033[0;34m${1}\033[0m"
+}
 
 me=$(whoami)
 
-echo "[INFO] Running script as ${me}"
+LOG "[INFO] Running script as ${me}"
 
 original_dir=$(pwd)
 
@@ -11,7 +16,7 @@ DEP_DIR="../MIToolbox"
 
 if [ -d "$DEP_DIR" ]; then
     if [ "$(ls -A $DEP_DIR)" ]; then
-	echo "[DEBUG] Submodule already initialized";
+	LOG "Submodule already initialized";
     else
 	cd ..;
 	git submodule init;
@@ -25,7 +30,7 @@ cd $DEP_DIR;
 make clean && make;
 
 if [ "$me" = "root" ] ; then
-    echo "[INFO] Running make install as root";
+    LOG "Running make install as root";
     make install;
 else
     sudo make install;
@@ -38,34 +43,32 @@ make clean && make;
 if [ "$me" = "root" ] ; then
     make install;
 else
-    echo "[INFO] Running make install as root";
+    LOG "Running make install as root";
     sudo make install;
 fi
 
 if [[ -z "${LD_LIBRARY_PATH}" ]] ; then
     # These were more than likely added to /usr/local/lib
-    echo "export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib" >> $HOME/.bashrc
+    LOG "export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib" >> $HOME/.bashrc
 else
     if [[ ":$LD_LIBRARY_PATH:" == *":/lib:"* ]] ; then
-	echo "[DEBUG] /lib is already part of LD_LIBRARY_PATH"
+	LOG "/lib is already part of LD_LIBRARY_PATH"
     else
-	echo "export LD_LIBRARY_PATH=/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
+	LOG "export LD_LIBRARY_PATH=/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 
     if [[ ":$LD_LIBRARY_PATH:" == *":/usr/lib:"* ]] ; then
-	echo "[DEBUG] /usr/lib is already part of LD_LIBRARY_PATH"
+	LOG "/usr/lib is already part of LD_LIBRARY_PATH"
     else
-	echo "export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
+	LOG "export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 
     if [[ ":$LD_LIBRARY_PATH:" == *":/usr/local/lib:"* ]] ; then
-	echo "[DEBUG] /usr/local/lib is already part of LD_LIBRARY_PATH"
+	LOG "/usr/local/lib is already part of LD_LIBRARY_PATH"
     else
-	echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
+	LOG "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> $HOME/.bashrc
     fi
 fi
-
-source $HOME/.bashrc
 
 # build the python data !
 cd $original_dir;
@@ -73,6 +76,6 @@ cd $original_dir;
 if [ "$me" = "root" ] ; then
     python3 -m pip install . --upgrade;
 else
-    echo "[INFO] Running python install as root";
+    LOG "Running python install as root";
     sudo python3 -m pip install . --upgrade;
 fi

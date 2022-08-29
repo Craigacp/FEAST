@@ -18,7 +18,7 @@ A _requirements.txt_ file is supplied in the event that a user would like to ins
 The following example will illustrate the (simple) usage of the library.
 
 ```python
-from feast.feast import CMIM
+from fstoolbox import CMIM
 import pandas as pd
 import numpy as np
 from sklearn.datasets import load_boston
