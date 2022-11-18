@@ -39,11 +39,15 @@ jobs:
       run: |
         git submodule init
         git submodule update
-    - name: Build package
-      run: |
-        python -m build
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+    - name: Build manylinux Python wheels
+      uses: RalfG/python-wheels-manylinux-build@v0.5.0-manylinux2014_x86_64
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
+        build-requirements: 'numpy pandas scikit-learn'
+    - name: Publish wheels to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload dist/*-manylinux*.whl
+
