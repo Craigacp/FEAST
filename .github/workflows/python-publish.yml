@@ -34,7 +34,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools
         pip install build wheel
-        sudo apt-get install -y git gcc gcc-devel
+        sudo apt-get install -y git gcc
     - name: Update submodule
       run: |
         git submodule init
