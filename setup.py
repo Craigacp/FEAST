@@ -1,4 +1,4 @@
-from setuptools import setup, dist
+from setuptools import setup, dist, Extension
 from setuptools.command.install import install
 from os.path import dirname, abspath, join, exists
 from os import system
@@ -78,9 +78,13 @@ def run_setup():
         distclass=BinaryDistribution,
         include_package_data=True,
         package_data={'': [
-            join(feast_dir, "libFSToolbox.so"),
-            join(mitoolbox_dir, "libMIToolbox.so")
-        ]}
+            join(mitoolbox_dir, "libMIToolbox.so"),
+            join(feast_dir, "libFSToolbox.so")
+        ]},
+        ext_modules=[
+            Extension(name="MIToolbox", sources=[]),
+            Extension(name="FSToolbox", sources=[])
+        ]
     )
 
 
