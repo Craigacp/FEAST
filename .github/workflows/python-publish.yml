@@ -31,10 +31,11 @@ jobs:
         python-version: '3.x'
     - name: Install dependencies
       run: |
+        sudo apt-get update -y
+        sudo apt-get install -y git gcc
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools
         pip install build wheel
-        sudo apt-get install -y git gcc
     - name: Update submodule
       run: |
         git submodule init
