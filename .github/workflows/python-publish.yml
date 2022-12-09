@@ -21,7 +21,7 @@ jobs:
     name: deploy-${{matrix.python-version}}
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -43,10 +43,6 @@ jobs:
 
     - name: Build Dependencies
       run: |
-        lsb_release -a
-        uname -r
-        gcc --version
-        #set -eux
         echo `pwd`
         cd MIToolbox
         make && sudo make install
