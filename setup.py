@@ -14,9 +14,9 @@ readme_path = join(base_dir, "README.md")
 
 def CreateDependencies():
 
-    if not exists(mitoolbox_dir):
-        system("git submodule init")
-    system("git submodule update --remote")
+    #if not exists(mitoolbox_dir):
+    #    system("git submodule init")
+    #system("git submodule update --remote")
 
     if not exists(mitoolbox_dir):
         sys.exit(1)
@@ -25,6 +25,7 @@ def CreateDependencies():
     if "windows" in platform.system().lower():
         build_args = " x64_win"
 
+    system("export LD_LIBRARY_PATH=/usr/local/lib")
     system("cd {} && make{} && cd {}".format(mitoolbox_dir, build_args, base_dir))
     system("make{}".format(build_args))
 
