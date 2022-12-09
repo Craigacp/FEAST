@@ -17,27 +17,31 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
-
+    name: deploy-${{matrix.python-version}}
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: ["3.6" "3.7" "3.8" "3.9" "3.10" "3.11"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: '3.x'
+        python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
+        set -eux
         sudo apt-get update -y
         sudo apt-get install -y git gcc tree
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        pip install build wheel
+
     - name: Update submodule
       run: |
         git submodule init
         git submodule update --remote
         tree
+
     - name: Build Dependencies
       run: |
         set -eux
@@ -47,11 +51,29 @@ jobs:
         cd ..
         echo `pwd`
         make && sudo make install
-    - name: Build manylinux Python wheels
-      uses: RalfG/python-wheels-manylinux-build@v0.6.0-manylinux2014_x86_64
-      with:
-        python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
-        build-requirements: 'numpy pandas scikit-learn'
+
+    - name: Install And Build Pywheel
+      run: |
+        set -eux
+
+        python -m venv feast_venv
+        source feast_venv/bin/activate
+        pip install pip --upgrade
+        pip install setuptools --upgrade
+        pip install -r requirements.txt
+        pip install auditwheel wheel build pyelftools patchelf
+
+        pip wheel . -w dist
+
+        for f in $(ls dist/fstoolbox*); do
+            auditwheel repair $f --plat manylinux2014_x86_64
+        done
+
+        rm -rf dist
+
+        deactivate
+        rm -rf feast_venv
+
     - name: Publish wheels to PyPI
       env:
         TWINE_USERNAME: __token__
