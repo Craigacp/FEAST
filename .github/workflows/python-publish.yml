@@ -32,14 +32,15 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y git gcc
+        sudo apt-get install -y git gcc tree
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools
         pip install build wheel
     - name: Update submodule
       run: |
         git submodule init
-        git submodule update
+        git submodule update --remote
+        tree
     - name: Build manylinux Python wheels
       uses: RalfG/python-wheels-manylinux-build@v0.6.0-manylinux2014_x86_64
       with:
