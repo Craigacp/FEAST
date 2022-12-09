@@ -43,7 +43,10 @@ jobs:
 
     - name: Build Dependencies
       run: |
-        set -eux
+        lsb_release -a
+        uname -r
+        gcc --version
+        #set -eux
         echo `pwd`
         cd MIToolbox
         make && sudo make install
