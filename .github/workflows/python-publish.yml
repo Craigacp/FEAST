@@ -64,7 +64,7 @@ jobs:
         pip wheel . -w dist
 
         for f in $(ls dist/fstoolbox*); do
-            auditwheel repair $f --plat manylinux2014_x86_64
+            auditwheel repair $f --plat manylinux_2_35_x86_64
         done
 
         rm -rf dist
