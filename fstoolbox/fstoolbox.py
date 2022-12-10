@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from ctypes import cdll, POINTER, c_uint, c_double
+from ctypes.util import find_library
 import inspect
 from numpy import zeros
 import numpy as np
@@ -36,7 +37,18 @@ from logging import getLogger
 log = getLogger()
 
 # load the library
-fstoolbox_lib = cdll.LoadLibrary("libFSToolbox.so")
+dll = find_library("libFSToolbox.so")
+if not dll:
+    log.warning("failed to find libFSToolbox.so")
+    from os.path import dirname, abspath, exists, join
+    so_file = join(dirname(abspath(__file__)), "../libFSToolbox.so")
+    if exists(so_file):
+        fstoolbox_lib = cdll.LoadLibrary(so_file)
+    else:
+        log.error("failed to find %s"%so_file)
+        exit(1)
+else:
+    fstoolbox_lib = cdll.LoadLibrary(dll)
 
 
 def _load(config):
@@ -47,7 +59,7 @@ def _load(config):
             f.argtypes = config.argtypes
             f.restype = config.restype
         else:
-            print("Failed to set types for %s", func_name)
+            print("Failed to set types for %s"%func_name)
 
 class Config:
     def __init__(self, func_names, argtypes, restype):
@@ -128,7 +140,7 @@ def _FeatureSelectionCommon(data_set, labels, num_features_to_select, *args, **k
     if internal_function is None:
         raise RuntimeError("Failed to find %s in fstoolbox", str(inspect.stack()[1][3]))
     else:
-        log.info("Running %s", str(inspect.stack()[1][3]))
+        log.info("Running %s"%str(inspect.stack()[1][3]))
 
     _data_set = np.array(data_set, dtype=np.uint32, order="F")
     _labels = np.array(labels, dtype=np.uint32)
@@ -210,7 +222,7 @@ def _discFeatureSelectionCommon(data_set, labels, num_features_to_select, *args,
     if internal_function is None:
         raise RuntimeError("Failed to find %s in fstoolbox", str(inspect.stack()[1][3]))
     else:
-        log.info("Running %s", str(inspect.stack()[1][3]))
+        log.info("Running %s"%str(inspect.stack()[1][3]))
         
     _data_set = np.array(data_set, dtype=np.uint32, order="C")
     _labels = np.array(labels, dtype=np.uint32)
@@ -287,7 +299,7 @@ def _WeightedFeatureSelectionCommon(data_set, labels, weights, num_features_to_s
     if internal_function is None:
         raise RuntimeError("Failed to find %s in fstoolbox", str(inspect.stack()[1][3]))
     else:
-        log.info("Running %s", str(inspect.stack()[1][3]))
+        log.info("Running %s"%str(inspect.stack()[1][3]))
 
     _data_set = np.array(data_set, dtype=np.uint32, order="F")
     _labels = np.array(labels, dtype=np.uint32)
@@ -356,7 +368,7 @@ def _discWeightedFeatureSelectionCommon(data_set, labels, weights, num_features_
     if internal_function is None:
         raise RuntimeError("Failed to find %s in fstoolbox", str(inspect.stack()[1][3]))
     else:
-        log.info("Running %s", str(inspect.stack()[1][3]))
+        log.info("Running %s"%str(inspect.stack()[1][3]))
     
     _data_set = np.array(data_set, dtype=np.uint32, order="C")
     _labels = np.array(labels, dtype=np.uint32)

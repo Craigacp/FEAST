@@ -45,7 +45,7 @@ def run_setup():
     setup (
         name='fstoolbox',
         packages=['fstoolbox'],
-        version='0.0.1',
+        version='0.0.2',
         author='Adam Pocock',
         author_email='adam@adampocock.com',
         maintainer='Brent Barbachem',
